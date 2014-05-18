@@ -1,0 +1,6 @@
+/IHaskell.app
+.cabal-sandbox
+cabal.sandbox.config
+/dist/
+*.hi
+*.o
