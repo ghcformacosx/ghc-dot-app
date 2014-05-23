@@ -290,7 +290,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "rsync -av \"${PROJECT_DIR}/../dist/build/ghc-${GHC_VERSION}.app/Contents/\" \"${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}\"";
+			shellScript = "GHC_SOURCE=\"${PROJECT_DIR}/../dist/build/ghc-${GHC_VERSION}.app/Contents\"\nGHC_DESTINATION=\"${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}\"\nrsync -av \"${GHC_SOURCE}/\" \"${GHC_DESTINATION}/\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -439,7 +439,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GHC/GHC-Prefix.pch";
