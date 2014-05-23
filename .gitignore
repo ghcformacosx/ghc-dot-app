@@ -4,3 +4,5 @@ cabal.sandbox.config
 /dist/
 *.hi
 *.o
+.DS_Store
+xcuserdata
