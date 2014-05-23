@@ -52,6 +52,7 @@ data BuildState = BuildState
   , buildGhcName         :: String
   , buildBinDir          :: String
   , buildConfDir         :: String
+  , buildShareDir        :: String
   } deriving (Show, Eq)
 
 data Release = Release
@@ -90,6 +91,7 @@ buildState rel cabalRel here = b
       , buildGhcName         = "ghc-" ++ releaseVersion rel
       , buildBinDir          = buildPrefixDir b </> "bin"
       , buildConfDir         = buildPkgRoot b </> "package.conf.d"
+      , buildShareDir        = buildPrefixDir b </> "share"
       }
 
 defRule :: Rule
@@ -165,16 +167,22 @@ fixupScript buildPrefixDir fileName =
         s
 
 fixupConf :: BuildState -> IO ()
-fixupConf (BuildState { buildPkgRoot, buildConfDir }) = do
+fixupConf (BuildState { buildPkgRoot, buildConfDir, buildShareDir }) = do
   files <- filter ((".conf"==) . takeExtension) <$> getDirectoryContents buildConfDir
-  mapM_ (fixPkgRoot (T.pack buildPkgRoot) . (buildConfDir </>)) files
+  mapM_ (fixPkgRoot pkgRoot shareDir . (buildConfDir </>)) files
+  where
+    pkgRoot  = T.pack buildPkgRoot
+    shareDir = T.pack buildShareDir
 
-fixPkgRoot :: T.Text -> FilePath -> IO ()
-fixPkgRoot pkgroot fileName = do
+fixPkgRoot :: T.Text -> T.Text -> FilePath -> IO ()
+fixPkgRoot pkgRoot shareDir fileName = do
   s <- T.readFile fileName
-  when (pkgroot `T.isInfixOf` s) $ do
+  when (pkgRoot `T.isInfixOf` s) $ do
     putStrLn fileName
-    T.writeFile fileName $ T.replace pkgroot "${pkgroot}" s
+    T.writeFile fileName .
+      T.replace pkgRoot "${pkgroot}" .
+      T.replace shareDir (T.append pkgRoot "/../../share") $
+      s
 
 recachePkg :: BuildState -> IO ()
 recachePkg bs = do
@@ -247,11 +255,7 @@ buildRelease bs@(BuildState
   , ruleDependencies = [ unpackRelease buildRel buildUnpackDest bs
                        , ensureDir buildPrefixDir ]
   , ruleRun          = withDir buildUnpackDest $ do
-      callProcess "./configure"
-        [ "--prefix=" ++ buildPrefixDir
-        -- Setting datarootdir like this is a bit silly, but it does make all of
-        -- the paths easily relocatable
-        , "--datarootdir=" ++ buildPkgRoot </> "share" ]
+      callProcess "./configure" [ "--prefix=" ++ buildPrefixDir ]
       callProcess "make" ["install"]
       mapM_ ($ bs)
         [ fixupBin

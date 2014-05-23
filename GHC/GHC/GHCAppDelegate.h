@@ -8,8 +8,10 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface GHCAppDelegate : NSObject <NSApplicationDelegate>
+@interface GHCAppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
-
+@property (assign) IBOutlet NSImageView *haskellIcon;
+@property (assign) IBOutlet NSTextField *shellCopy;
+- (IBAction)openDocs:(id)sender;
 @end

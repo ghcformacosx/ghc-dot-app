@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5023" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13D65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5023"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -13,6 +13,8 @@
         <customObject id="-3" userLabel="Application"/>
         <customObject id="Voe-Tx-rLC" customClass="GHCAppDelegate">
             <connections>
+                <outlet property="haskellIcon" destination="8Dh-d5-fdh" id="Npa-64-0jz"/>
+                <outlet property="shellCopy" destination="Djm-hP-Ybh" id="enr-Xp-N8r"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
             </connections>
         </customObject>
@@ -658,7 +660,7 @@
                         <items>
                             <menuItem title="GHC Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                 <connections>
-                                    <action selector="showHelp:" target="-1" id="y7X-2Q-9no"/>
+                                    <action selector="openDocs:" target="Voe-Tx-rLC" id="VUO-IB-aVm"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -669,12 +671,72 @@
         <window title="GHC" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="335" y="390" width="480" height="360"/>
+            <rect key="contentRect" x="335" y="390" width="480" height="347"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1028"/>
             <view key="contentView" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
+                <rect key="frame" x="0.0" y="0.0" width="480" height="347"/>
                 <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="8Dh-d5-fdh">
+                        <rect key="frame" x="17" y="196" width="134" height="134"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="128" id="GKf-CS-aA0"/>
+                            <constraint firstAttribute="height" constant="128" id="jPc-mR-jgk"/>
+                            <constraint firstAttribute="width" constant="128" id="tqV-jj-KLd"/>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="128" id="xL2-WO-nqL"/>
+                        </constraints>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" imageFrameStyle="grayBezel" id="SE4-qH-BQ6"/>
+                    </imageView>
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="nVR-cR-dMW">
+                        <rect key="frame" x="154" y="199" width="308" height="128"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" id="rJs-d9-jKW">
+                            <font key="font" metaFont="system"/>
+                            <string key="title">This app is a container for GHC and cabal-install.  To use it, move this application bundle somewhere stable such as your Applications folder, and then add it to your $PATH.</string>
+                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jDT-Uz-aUx">
+                        <rect key="frame" x="377" y="18" width="83" height="25"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="roundTextured" title="Open Docs" bezelStyle="texturedRounded" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="h8X-I2-YZn">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="openDocs:" target="Voe-Tx-rLC" id="ngW-Bn-qEF"/>
+                        </connections>
+                    </button>
+                    <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Djm-hP-Ybh">
+                        <rect key="frame" x="20" y="50" width="440" height="141"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="Line 1 Line 2 Line 3 Line 4 Line 5 Line 6 Line 7 Line 8" drawsBackground="YES" id="AgA-Nq-b5x">
+                            <font key="font" size="11" name="Menlo-Regular"/>
+                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="Djm-hP-Ybh" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" constant="20" id="53s-cm-WpO"/>
+                    <constraint firstItem="jDT-Uz-aUx" firstAttribute="top" secondItem="Djm-hP-Ybh" secondAttribute="bottom" constant="8" id="5bV-zf-jRH"/>
+                    <constraint firstAttribute="trailing" secondItem="Djm-hP-Ybh" secondAttribute="trailing" constant="20" id="96B-zq-JDa"/>
+                    <constraint firstItem="Djm-hP-Ybh" firstAttribute="top" secondItem="nVR-cR-dMW" secondAttribute="bottom" constant="8" id="A1m-Uy-VXZ"/>
+                    <constraint firstAttribute="trailing" secondItem="nVR-cR-dMW" secondAttribute="trailing" constant="20" id="AWC-Td-m7g"/>
+                    <constraint firstAttribute="bottom" secondItem="jDT-Uz-aUx" secondAttribute="bottom" constant="20" id="RHC-cF-31l"/>
+                    <constraint firstItem="8Dh-d5-fdh" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" constant="20" id="TWk-0G-GEK"/>
+                    <constraint firstItem="nVR-cR-dMW" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" constant="20" id="Vld-UN-S7a"/>
+                    <constraint firstItem="nVR-cR-dMW" firstAttribute="height" secondItem="8Dh-d5-fdh" secondAttribute="height" id="ZOM-oi-kbF"/>
+                    <constraint firstItem="8Dh-d5-fdh" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" constant="20" id="gej-Si-55h"/>
+                    <constraint firstAttribute="trailing" secondItem="jDT-Uz-aUx" secondAttribute="trailing" constant="20" id="hVf-g4-H38"/>
+                    <constraint firstItem="nVR-cR-dMW" firstAttribute="leading" secondItem="8Dh-d5-fdh" secondAttribute="trailing" constant="8" id="ss9-U7-hBJ"/>
+                </constraints>
             </view>
+            <connections>
+                <outlet property="delegate" destination="Voe-Tx-rLC" id="eTK-Vc-0oF"/>
+            </connections>
         </window>
     </objects>
 </document>
