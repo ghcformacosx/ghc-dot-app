@@ -26,7 +26,7 @@
     self.shellCopy.stringValue = [NSString stringWithFormat:
                                   @"# Add this to your .bashrc\n"
                                   @"GHC_APP=\"%@\"\n"
-                                  @"export PATH=\"${GHC_APP}/bin:${PATH}\"\n"
+                                  @"export PATH=\"${HOME}/.cabal/bin:${GHC_APP}/bin:${PATH}\"\n"
                                   @"", contents];
 }
 

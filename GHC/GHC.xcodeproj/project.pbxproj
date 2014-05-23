@@ -166,12 +166,12 @@
 /* Begin PBXLegacyTarget section */
 		C4CD2545192EC84C00158BFF /* Run build script */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "-c 'PATH=/opt/ghc-7.8.2/bin:$PATH; cd \"${PROJECT_DIR}/..\"; runhaskell ./Main.hs'";
+			buildArgumentsString = "-l -c 'runhaskell ./Main.hs'";
 			buildConfigurationList = C4CD2546192EC84C00158BFF /* Build configuration list for PBXLegacyTarget "Run build script" */;
 			buildPhases = (
 			);
 			buildToolPath = /bin/bash;
-			buildWorkingDirectory = "";
+			buildWorkingDirectory = ..;
 			dependencies = (
 			);
 			name = "Run build script";
@@ -547,6 +547,7 @@
 				C4CD2541192EC39800158BFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C4CD2542192EC39800158BFF /* Build configuration list for PBXNativeTarget "GHCTests" */ = {
 			isa = XCConfigurationList;
@@ -555,6 +556,7 @@
 				C4CD2544192EC39800158BFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C4CD2546192EC84C00158BFF /* Build configuration list for PBXLegacyTarget "Run build script" */ = {
 			isa = XCConfigurationList;
@@ -563,6 +565,7 @@
 				C4CD2548192EC84C00158BFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
