@@ -3,7 +3,25 @@
 Want to try Haskell on your Mac without having to use homebrew or
 even install anything globally? Download a self-contained GHC release here!
 
-* [ghc-7.8.2-r1.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.2-r1/ghc-7.8.2-r1.zip)
+* [ghc-7.8.2-r2.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.2-r2/ghc-7.8.2-r2.zip)
+
+# What it includes
+
+* GHC 7.8.2
+* cabal-install 1.20.0.1 (just the binary)
+* alex 3.1.3
+* happy 1.9.13
+* HTML documentation
+* man pages
+
+Included as dependencies for alex and happy:
+
+* QuickCheck 2.7.3
+* mtl 2.2.0.1
+* transformers 0.4.1.0
+* primitive 0.5.3.0
+* random 1.0.1.1
+* tf-random 0.5
 
 # Building
 

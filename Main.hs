@@ -19,7 +19,9 @@ import Control.Applicative ((<$>))
 import System.Directory
   ( getCurrentDirectory, getDirectoryContents, doesDirectoryExist
   , setCurrentDirectory, createDirectoryIfMissing, doesFileExist
-  , copyFile )
+  , copyFile
+  )
+import System.Environment (getEnv)
 import System.FilePath ((</>), takeExtension, takeFileName)
 import System.Process (callProcess, readProcess)
 import Control.Monad (when, filterM)
@@ -248,8 +250,7 @@ unpackRelease getRel unpackDest bs@(BuildState
 
 buildRelease :: BuildState -> Rule
 buildRelease bs@(BuildState
-    { buildPrefixDir, buildGhcName, buildBinDir
-    , buildUnpackDest, buildPkgRoot }) = defRule
+    { buildPrefixDir, buildGhcName, buildBinDir, buildUnpackDest }) = defRule
   { ruleName         = "build " ++ buildGhcName
   , ruleCheck        = doesFileExist (buildBinDir </> "ghc")
   , ruleDependencies = [ unpackRelease buildRel buildUnpackDest bs
@@ -264,24 +265,52 @@ buildRelease bs@(BuildState
         ]
   }
 
-installCabal :: BuildState -> Rule
-installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
-  { ruleName         = "install cabal " ++ releaseVersion (buildCabalRel bs)
+installPackages :: BuildState -> Rule
+installPackages bs@(BuildState
+    { buildUnpackDir, buildBinDir, buildPrefixDir, buildConfDir }) = defRule
+  { ruleName         = "installing " ++ unwords packages
   , ruleCheck        = doesFileExist cabalDest
   , ruleDependencies = [ unpackRelease buildCabalRel cabalSrc bs ]
-  , ruleRun          = copyFile cabalSrc cabalDest 
+  , ruleRun          = do
+      path <- getEnv "PATH"
+      let
+        callEnv args = callProcess "env"
+          ( concat [ "PATH=", buildBinDir, ":", path ] : args )
+      callEnv [ cabalSrc, "update" ]
+      callEnv
+        ( cabalSrc
+        :"install"
+        : "--enable-documentation"
+        : "--enable-library-profiling"
+        : "--global"
+        : ("--package-db=" ++ buildConfDir)
+        : ("--prefix=" ++ buildPrefixDir)
+        -- : "--libsubdir=$compiler/$pkgid"
+        -- : "--datasubdir=$compiler/$pkgid"
+        -- : "--docdir=$datadir/doc/$pkgid"
+        : packages
+        )
+      mapM_ ($ bs) [ fixupConf, recachePkg ]
+      copyFile cabalSrc cabalDest
   }
   where
-    cabalSrc  = buildUnpackDir </> "dist" </> "build" </> "cabal" </> "cabal"
+    packages = [ "alex==3.1.3"
+               , "happy==1.19.3"
+               -- , "cabal==1.20.0.0"
+               -- , "cabal-install==1.20.0.1"
+               ]
     cabalDest = buildBinDir </> "cabal"
-   
+    cabalSrc = buildUnpackDir </> "dist" </> "build" </> "cabal" </> "cabal"
 
 buildApp :: BuildState -> Rule
 buildApp bs = defRule
   { ruleName         = "building " ++ buildAppDir bs
-  , ruleDependencies = map ($ bs) [ buildRelease, installCabal ]
+  , ruleDependencies = map ($ bs) [ buildRelease, installPackages ]
   }
+
+latestBuildState :: IO BuildState
+latestBuildState = buildState latestGhc latestCabal <$> getCurrentDirectory
 
 main :: IO ()
 main =
-  getCurrentDirectory >>= runRule . buildApp . buildState latestGhc latestCabal
+  latestBuildState >>= runRule . buildApp
