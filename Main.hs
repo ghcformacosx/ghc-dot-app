@@ -168,6 +168,23 @@ fixupScript buildPrefixDir fileName =
         T.replace prefixDir "${DIR}" $
         s
 
+sanityCheck :: BuildState -> Rule
+sanityCheck (BuildState { buildPkgRoot, buildConfDir, buildDistDir }) = defRule
+  { ruleName = "sanityCheck " ++ buildConfDir
+  , ruleRun = do
+      files <- filter ((".conf"==) . takeExtension) <$> getDirectoryContents buildConfDir
+      mapM_ (checkBuildDir distDir . (buildConfDir </>)) files
+  }
+  where
+    distDir  = T.pack buildDistDir
+
+checkBuildDir :: T.Text -> FilePath -> IO ()
+checkBuildDir distDir fileName = do
+  s <- T.readFile fileName
+  when (distDir `T.isInfixOf` s) $ do
+    putStrLn ("FAIL: " ++ fileName)
+    fail fileName
+
 fixupConf :: BuildState -> IO ()
 fixupConf (BuildState { buildPkgRoot, buildConfDir, buildShareDir }) = do
   files <- filter ((".conf"==) . takeExtension) <$> getDirectoryContents buildConfDir
@@ -285,9 +302,9 @@ installPackages bs@(BuildState
         : "--global"
         : ("--package-db=" ++ buildConfDir)
         : ("--prefix=" ++ buildPrefixDir)
-        -- : "--libsubdir=$compiler/$pkgid"
-        -- : "--datasubdir=$compiler/$pkgid"
-        -- : "--docdir=$datadir/doc/$pkgid"
+        : "--libsubdir=$compiler/$pkgid"
+        : "--datasubdir=$compiler/$pkgid"
+        : "--docdir=$datadir/doc/$pkgid"
         : packages
         )
       mapM_ ($ bs) [ fixupConf, recachePkg ]
@@ -305,7 +322,9 @@ installPackages bs@(BuildState
 buildApp :: BuildState -> Rule
 buildApp bs = defRule
   { ruleName         = "building " ++ buildAppDir bs
-  , ruleDependencies = map ($ bs) [ buildRelease, installPackages ]
+  , ruleDependencies = map ($ bs) [ buildRelease
+                                  , installPackages
+                                  , sanityCheck ]
   }
 
 latestBuildState :: IO BuildState
