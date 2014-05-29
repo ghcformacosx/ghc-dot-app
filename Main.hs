@@ -282,48 +282,10 @@ buildRelease bs@(BuildState
         ]
   }
 
-installPackages :: BuildState -> Rule
-installPackages bs@(BuildState
-    { buildUnpackDir, buildBinDir, buildPrefixDir, buildConfDir }) = defRule
-  { ruleName         = "installing " ++ unwords packages
-  , ruleCheck        = doesFileExist cabalDest
-  , ruleDependencies = [ unpackRelease buildCabalRel cabalSrc bs ]
-  , ruleRun          = do
-      path <- getEnv "PATH"
-      let
-        callEnv args = callProcess "env"
-          ( concat [ "PATH=", buildBinDir, ":", path ] : args )
-      callEnv [ cabalSrc, "update" ]
-      callEnv
-        ( cabalSrc
-        :"install"
-        : "--enable-documentation"
-        : "--enable-library-profiling"
-        : "--global"
-        : ("--package-db=" ++ buildConfDir)
-        : ("--prefix=" ++ buildPrefixDir)
-        : "--libsubdir=$compiler/$pkgid"
-        : "--datasubdir=$compiler/$pkgid"
-        : "--docdir=$datadir/doc/$pkgid"
-        : packages
-        )
-      mapM_ ($ bs) [ fixupConf, recachePkg ]
-      copyFile cabalSrc cabalDest
-  }
-  where
-    packages = [ "alex==3.1.3"
-               , "happy==1.19.3"
-               -- , "cabal==1.20.0.0"
-               -- , "cabal-install==1.20.0.1"
-               ]
-    cabalDest = buildBinDir </> "cabal"
-    cabalSrc = buildUnpackDir </> "dist" </> "build" </> "cabal" </> "cabal"
-
 buildApp :: BuildState -> Rule
 buildApp bs = defRule
   { ruleName         = "building " ++ buildAppDir bs
   , ruleDependencies = map ($ bs) [ buildRelease
-                                  , installPackages
                                   , sanityCheck ]
   }
 
