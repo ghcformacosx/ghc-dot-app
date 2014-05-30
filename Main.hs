@@ -282,10 +282,22 @@ buildRelease bs@(BuildState
         ]
   }
 
+installCabal :: BuildState -> Rule
+installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
+  { ruleName         = "install cabal " ++ releaseVersion (buildCabalRel bs)
+  , ruleCheck        = doesFileExist cabalDest
+  , ruleDependencies = [ unpackRelease buildCabalRel cabalSrc bs ]
+  , ruleRun          = copyFile cabalSrc cabalDest 
+  }
+  where
+    cabalSrc  = buildUnpackDir </> "dist" </> "build" </> "cabal" </> "cabal"
+    cabalDest = buildBinDir </> "cabal"
+
 buildApp :: BuildState -> Rule
 buildApp bs = defRule
   { ruleName         = "building " ++ buildAppDir bs
   , ruleDependencies = map ($ bs) [ buildRelease
+                                  , installCabal
                                   , sanityCheck ]
   }
 
