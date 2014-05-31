@@ -24,10 +24,11 @@
     self.haskellIcon.imageFrameStyle = NSImageFrameNone;
     self.haskellIcon.image = [NSApp applicationIconImage];
     self.shellCopy.stringValue = [NSString stringWithFormat:
-                                  @"# Add this to your .bashrc\n"
-                                  @"GHC_APP=\"%@\"\n"
-                                  @"export PATH=\"${HOME}/.cabal/bin:${GHC_APP}/bin:${PATH}\"\n"
-                                  @"", contents];
+                                  @"# Add this to your ~/.bashrc and ~/.profile files\n"
+                                  @"if [ -z \"$GHC_DOT_APP\" ]; then\n"
+                                  @"    export GHC_DOT_APP=\"%@\"\n"
+                                  @"    export PATH=\"${HOME}/.cabal/bin:${GHC_DOT_APP}/bin:${PATH}\"\n"
+                                  @"fi\n", contents];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)app
