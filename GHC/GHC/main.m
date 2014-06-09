@@ -7,8 +7,17 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "GHCAppDelegate.h"
 
 int main(int argc, const char * argv[])
 {
-    return NSApplicationMain(argc, argv);
+    @autoreleasepool {
+        NSApplication *app = [NSApplication sharedApplication];
+        [app setActivationPolicy:NSApplicationActivationPolicyRegular];
+        GHCAppDelegate *delegate = [GHCAppDelegate new];
+        app.delegate = delegate;
+        [app activateIgnoringOtherApps:YES];
+        [app run];
+    }
+    return EXIT_SUCCESS;
 }

@@ -1,0 +1,46 @@
+body {
+    background-color: #ededed;
+    -webkit-user-select: none;
+    cursor: default;
+    font-family: "Lucida Grande", sans-serif;
+}
+header .logo {
+    float: left;
+    margin-right: 1em;
+    margin-bottom: 1em;
+}
+section {
+    clear: both;
+}
+.code-box {
+    background-color: #ffffff;
+    box-shadow: 0 1px 1px #ddd inset;
+    padding: 10px;
+    display: inline-block;
+    border: 1px solid #9b9b9b;
+    cursor: pointer;
+}
+button {
+    cursor: pointer;
+    padding: 5px;
+}
+ul.checklist {
+    list-style-type: none;
+    padding: 0 0 0 1.666em;
+    text-indent: -1.666em;
+    margin: 1em 0 1em 0;
+}
+ul.checklist li {
+    margin-bottom: 0.5em;
+}
+.warning:before {
+    content: "\26A0\FE0F\00A0";
+}
+.check-mark:before {
+    content: "\2705\00A0";
+}
+
+code {
+    white-space: pre;
+    -webkit-user-select: all;
+}

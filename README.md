@@ -3,7 +3,7 @@
 Want to try Haskell on your Mac without having to use homebrew or
 even install anything globally? Download a self-contained GHC release here!
 
-* [ghc-7.8.2-r5.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.2-r5/ghc-7.8.2-r5.zip)
+* [ghc-7.8.2-r6.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.2-r6/ghc-7.8.2-r6.zip)
 
 # What it includes
 
@@ -50,10 +50,7 @@ Will produce a signed release build at `./GHC/build/Release/GHC.app`.
 
 # TODO
 
-* Create an executable that will help the user add this GHC to their
-  PATH
 * Watch app bundle to see if it moves
-* Help diagnose PATH issues?
 * Help people get out of cabal hell?
 * Pre-install some packages?
 * Make placeholders for GHC that work like xcodeselect?
