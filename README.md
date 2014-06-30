@@ -3,7 +3,7 @@
 Want to try Haskell on your Mac without having to use homebrew or
 even install anything globally? Download a self-contained GHC release here!
 
-* [ghc-7.8.2-r6.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.2-r6/ghc-7.8.2-r6.zip)
+* [ghc-7.8.2-r7.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.2-r7/ghc-7.8.2-r7.zip)
 
 # What it includes
 
