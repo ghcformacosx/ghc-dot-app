@@ -3,13 +3,11 @@
 
 {-
 
-This builds a relocatable ghc-7.8.2.app in dist/build,
-including cabal-install 1.20.0.1
+This builds a relocatable ghc-7.8.3.app in dist/build,
+including cabal-install 1.20.0.2
 
 TODO:
 
-* Add a sensible Info.plist and related metadata (icon, etc.)
-* Create an executable that will help the user add this GHC to their PATH
 * Pre-install some packages?
 
 -}
@@ -21,7 +19,6 @@ import System.Directory
   , setCurrentDirectory, createDirectoryIfMissing, doesFileExist
   , copyFile
   )
-import System.Environment (getEnv)
 import System.FilePath ((</>), takeExtension, takeFileName)
 import System.Process (callProcess, readProcess)
 import Control.Monad (when, filterM)
@@ -35,9 +32,9 @@ import qualified Control.Exception as C
 
 -- Layout:
 --
---   dist/download/[ghc-7.8.2-*.tar.xz]
---   dist/unpack/ghc-7.8.2
---   dist/build/ghc-[7.8.2].app/Contents/{lib,bin}/
+--   dist/download/[ghc-7.8.3-*.tar.xz]
+--   dist/unpack/ghc-7.8.3
+--   dist/build/ghc-[7.8.3].app/Contents/{lib,bin}/
 --
 
 data BuildState = BuildState
@@ -106,18 +103,18 @@ defRule = Rule
 
 latestGhc :: Release
 latestGhc = Release
-  { releaseVersion = "7.8.2"
-  , releaseUrl     = "http://www.haskell.org/ghc/dist/7.8.2/ghc-7.8.2-x86_64-apple-darwin-mavericks.tar.xz"
-  , releaseSha1    = "5219737fb38f882532712047f6af32fc73a91f0f"
-  , releaseSize    = 69679460
+  { releaseVersion = "7.8.3"
+  , releaseUrl     = "https://www.haskell.org/ghc/dist/7.8.3/ghc-7.8.3-x86_64-apple-darwin.tar.xz"
+  , releaseSha1    = "d55a671482614cbd3c12e4594437aedfd78f47de"
+  , releaseSize    = 69371660
   }
 
 latestCabal :: Release
 latestCabal = Release
-  { releaseVersion = "1.20.0.1"
-  , releaseUrl     = "http://www.haskell.org/cabal/release/cabal-install-1.20.0.1/cabal-x86_64-apple-darwin-mavericks.tar.gz"
-  , releaseSha1    = "393450339916581ebce50a797d23f86b11ae4200"
-  , releaseSize    = 2951089
+  { releaseVersion = "1.20.0.2"
+  , releaseUrl     = "http://www.haskell.org/cabal/release/cabal-install-1.20.0.2/cabal-x86_64-apple-darwin-mavericks.tar.gz"
+  , releaseSha1    = "55f42e8343473e208e817d573c6ab8b3865c7149"
+  , releaseSize    = 3892472
   }
 
 shellPreamble :: T.Text
@@ -169,7 +166,7 @@ fixupScript buildPrefixDir fileName =
         s
 
 sanityCheck :: BuildState -> Rule
-sanityCheck (BuildState { buildPkgRoot, buildConfDir, buildDistDir }) = defRule
+sanityCheck (BuildState { buildConfDir, buildDistDir }) = defRule
   { ruleName = "sanityCheck " ++ buildConfDir
   , ruleRun = do
       files <- filter ((".conf"==) . takeExtension) <$> getDirectoryContents buildConfDir
@@ -290,7 +287,7 @@ installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
   , ruleRun          = copyFile cabalSrc cabalDest 
   }
   where
-    cabalSrc  = buildUnpackDir </> "dist" </> "build" </> "cabal" </> "cabal"
+    cabalSrc  = buildUnpackDir </> "cabal"
     cabalDest = buildBinDir </> "cabal"
 
 buildApp :: BuildState -> Rule

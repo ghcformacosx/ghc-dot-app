@@ -2,8 +2,8 @@
 var defaultInfo = {
     bundlePath: '/Applications/GHC.app',
     bundleName: 'GHC',
-    bundleVersion: '7.8.2',
-    appName: 'ghc-7.8.2',
+    bundleVersion: '7.8.3',
+    appName: 'ghc-7.8.3',
     inDownloadsDir: false,
     isBash: false,
     environment: {SHELL: "/bin/bash"},
