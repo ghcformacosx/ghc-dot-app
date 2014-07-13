@@ -14,6 +14,15 @@ even install anything globally? Download a self-contained GHC release here!
 
 # Building
 
+To build from this repository you will need an existing installation of
+GHC such as the self-contained release above.
+
+If you do not have it already, you will also need the text package:
+
+```bash
+$ cabal install text
+```
+
 ## Minimal (no GUI helper)
 
 This will build a relocatable ghc-7.8.3.app in ./dist/build using
@@ -46,7 +55,8 @@ USAGE:
 $ (cd GHC; xcodebuild)
 ```
 
-Will produce a signed release build at `./GHC/build/Release/GHC.app`.
+Will produce a signed release build at `./GHC/build/Release/GHC.app`,
+if you have setup a signing identity with a Developer ID certificate.
 
 # TODO
 
