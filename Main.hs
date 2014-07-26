@@ -14,6 +14,8 @@ TODO:
 module Main (main) where
 
 import Control.Applicative ((<$>))
+import System.Environment (getArgs)
+import Data.List (foldl')
 import System.Directory
   ( getCurrentDirectory, getDirectoryContents, doesDirectoryExist
   , setCurrentDirectory, createDirectoryIfMissing, doesFileExist
@@ -54,6 +56,11 @@ data BuildState = BuildState
   , buildShareDir        :: String
   } deriving (Show, Eq)
 
+data Releases = Releases
+  { releasesCabal :: Release
+  , releasesGhc   :: Release
+  }
+
 data Release = Release
   { releaseVersion :: String
   , releaseUrl     :: String
@@ -71,9 +78,11 @@ data Rule = Rule
 releaseFileName :: Release -> FilePath
 releaseFileName = takeFileName . releaseUrl
 
-buildState :: Release -> Release -> FilePath -> BuildState
-buildState rel cabalRel here = b
+buildState :: Releases -> FilePath -> BuildState
+buildState releases here = b
   where
+    rel = releasesGhc releases
+    cabalRel = releasesCabal releases
     distDir = here </> "dist"
     n = buildGhcName b
     b = BuildState
@@ -115,6 +124,12 @@ latestCabal = Release
   , releaseUrl     = "http://www.haskell.org/cabal/release/cabal-install-1.20.0.2/cabal-x86_64-apple-darwin-mavericks.tar.gz"
   , releaseSha1    = "55f42e8343473e208e817d573c6ab8b3865c7149"
   , releaseSize    = 3892472
+  }
+
+latestReleases :: Releases
+latestReleases = Releases
+  { releasesCabal = latestCabal
+  , releasesGhc   = latestGhc
   }
 
 shellPreamble :: T.Text
@@ -298,9 +313,41 @@ buildApp bs = defRule
                                   , sanityCheck ]
   }
 
-latestBuildState :: IO BuildState
-latestBuildState = buildState latestGhc latestCabal <$> getCurrentDirectory
+parseReleases :: Releases -> [String] -> Releases
+parseReleases = foldl' (\arg acc -> either error id (parseArg arg acc))
+  where
+    parseArg acc arg = do
+      let err = Left ("Invalid option: " ++ arg)
+          splitChar c s = case break (c==) s of
+            (pre, _:s1) | not (null pre) -> return (pre, s1)
+            _                            -> err
+      s <- case span ('-'==) arg of
+        ("--", rest) -> return rest
+        _            -> err
+      (updater, s1) <- splitChar '-' s >>= \(prefix, rest) ->
+        case prefix of
+          "ghc"   -> return (updateGhc, rest)
+          "cabal" -> return (updateCabal, rest)
+          _       -> err
+      setter <- splitChar '=' s1 >>= \(prefix, rest) ->
+        case prefix of
+          "size" -> case reads rest of
+            [(size, "")] -> return (setSize size)
+            _            -> err
+          "version" -> return (setVersion rest)
+          "url"     -> return (setUrl rest)
+          "sha1"    -> return (setSha1 rest)
+          _         -> err
+      return (updater setter acc)
+    updateGhc f x = x { releasesGhc = f (releasesGhc x) }
+    updateCabal f x = x { releasesCabal = f (releasesCabal x) }
+    setVersion x r = r { releaseVersion = x }
+    setUrl x r = r { releaseUrl = x }
+    setSha1 x r = r { releaseSha1 = x }
+    setSize x r = r { releaseSize = x }
 
 main :: IO ()
-main =
-  latestBuildState >>= runRule . buildApp
+main = do
+  releases <- parseReleases latestReleases <$> getArgs
+  appRule <- buildApp . buildState releases <$> getCurrentDirectory
+  runRule appRule
