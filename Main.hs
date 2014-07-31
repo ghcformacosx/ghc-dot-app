@@ -4,7 +4,7 @@
 {-
 
 This builds a relocatable ghc-7.8.3.app in dist/build,
-including cabal-install 1.20.0.2
+including cabal-install 1.20.0.3
 
 TODO:
 
@@ -120,10 +120,10 @@ latestGhc = Release
 
 latestCabal :: Release
 latestCabal = Release
-  { releaseVersion = "1.20.0.2"
-  , releaseUrl     = "http://www.haskell.org/cabal/release/cabal-install-1.20.0.2/cabal-x86_64-apple-darwin-mavericks.tar.gz"
-  , releaseSha1    = "55f42e8343473e208e817d573c6ab8b3865c7149"
-  , releaseSize    = 3892472
+  { releaseVersion = "1.20.0.3"
+  , releaseUrl     = "http://www.haskell.org/cabal/release/cabal-install-1.20.0.3/cabal-1.20.0.3-x86_64-apple-darwin-mavericks.tar.gz"
+  , releaseSha1    = "e64789827dbc1b32db05a9e6cdb9366d8cc7f4da"
+  , releaseSize    = 2961724
   }
 
 latestReleases :: Releases
@@ -302,7 +302,7 @@ installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
   , ruleRun          = copyFile cabalSrc cabalDest 
   }
   where
-    cabalSrc  = buildUnpackDir </> "cabal"
+    cabalSrc  = buildUnpackDir </> "dist" </> "build" </> "cabal" </> "cabal"
     cabalDest = buildBinDir </> "cabal"
 
 buildApp :: BuildState -> Rule

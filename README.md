@@ -8,7 +8,7 @@ even install anything globally? Download a self-contained GHC release here!
 # What it includes
 
 * GHC 7.8.3
-* cabal-install 1.20.0.2 (just the binary)
+* cabal-install 1.20.0.3 (just the binary)
 * HTML documentation
 * man pages
 
