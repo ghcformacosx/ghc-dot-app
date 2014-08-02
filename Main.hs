@@ -110,12 +110,16 @@ defRule = Rule
   , ruleDependencies = []
   }
 
+-- For more information about why we are not currently using the official
+-- GHC v7.8.3 build:
+-- * http://www.haskell.org/pipermail/ghc-devs/2014-July/005688.html
+-- * http://www.haskell.org/pipermail/haskell-cafe/2014-July/115302.html
 latestGhc :: Release
 latestGhc = Release
   { releaseVersion = "7.8.3"
-  , releaseUrl     = "https://www.haskell.org/ghc/dist/7.8.3/ghc-7.8.3-x86_64-apple-darwin.tar.xz"
-  , releaseSha1    = "d55a671482614cbd3c12e4594437aedfd78f47de"
-  , releaseSize    = 69371660
+  , releaseUrl     = "http://www.ozonehouse.com/mark/platform/ghc-7.8.3-x86_64-apple-darwin-r3.tar.bz2"
+  , releaseSha1    = "da3cd3ad98841c35d978382be2f9509ebb40340c"
+  , releaseSize    = 129608585
   }
 
 latestCabal :: Release

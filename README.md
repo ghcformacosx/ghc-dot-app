@@ -3,11 +3,11 @@
 Want to try Haskell on your Mac without having to use homebrew or
 even install anything globally? Download a self-contained GHC release here!
 
-* [ghc-7.8.3-r1.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.3-r1/ghc-7.8.3-r1.zip)
+* [ghc-7.8.3-r2.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.3-r2/ghc-7.8.3-r2.zip)
 
 # What it includes
 
-* GHC 7.8.3
+* GHC 7.8.3 ([with Cabal patch](http://www.haskell.org/pipermail/haskell-cafe/2014-July/115302.html))
 * cabal-install 1.20.0.3 (just the binary)
 * HTML documentation
 * man pages
