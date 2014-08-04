@@ -13,6 +13,7 @@ TODO:
 -}
 module Main (main) where
 
+import Data.Char (toUpper)
 import Control.Applicative ((<$>))
 import System.Environment (getArgs)
 import Data.List (foldl')
@@ -23,14 +24,23 @@ import System.Directory
   )
 import System.FilePath ((</>), takeExtension, takeFileName)
 import System.Process (callProcess, readProcess)
-import Control.Monad (when, filterM)
+import Control.Monad (when, filterM, foldM)
 import System.Posix.Files
   ( getSymbolicLinkStatus, getFileStatus, isSymbolicLink, fileSize )
+import System.IO (stderr, hPutStrLn)
+import System.Exit (exitFailure)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Encoding as T
 import qualified Data.ByteString as B
 import qualified Control.Exception as C
+import System.Console.GetOpt
+  ( ArgOrder(..)
+  , OptDescr(..)
+  , ArgDescr(..)
+  , usageInfo
+  , getOpt
+  )
 
 -- Layout:
 --
@@ -216,7 +226,7 @@ fixPkgRoot pkgRoot shareDir fileName = do
       s
 
 recachePkg :: BuildState -> IO ()
-recachePkg bs = do
+recachePkg bs =
   callProcess (buildBinDir bs </> "ghc-pkg") ["recache"]
 
 ensureDir :: FilePath -> Rule
@@ -254,7 +264,7 @@ downloadRelease getRel bs@(BuildState { buildDownloadDir }) = defRule
       , (releaseSha1 rel ==) <$> sha1 tarFileName
       ]
   , ruleDependencies = [ ensureDir buildDownloadDir ]
-  , ruleRun          = do
+  , ruleRun          =
     callProcess "curl" [ "-s", "-o", tarFileName, releaseUrl rel ]
   }
   where
@@ -313,41 +323,45 @@ buildApp bs = defRule
                                   , sanityCheck ]
   }
 
-parseReleases :: Releases -> [String] -> Releases
-parseReleases = foldl' (\arg acc -> either error id (parseArg arg acc))
+die :: [String] -> IO a
+die errs = do
+  hPutStrLn stderr (concat errs ++ usageInfo header options)
+  exitFailure
+  where header = "Usage: runhaskell Main.hs [OPTION...]"
+
+parseReleases :: Releases -> [String] -> IO Releases
+parseReleases releases argv = case getOpt Permute options argv of
+  (opts, [], []) -> foldM (flip id) releases opts
+  (_, _, errs)    -> die (if showHelp then [] else errs)
   where
-    parseArg acc arg = do
-      let err = Left ("Invalid option: " ++ arg)
-          splitChar c s = case break (c==) s of
-            (pre, _:s1) | not (null pre) -> return (pre, s1)
-            _                            -> err
-      s <- case span ('-'==) arg of
-        ("--", rest) -> return rest
-        _            -> err
-      (updater, s1) <- splitChar '-' s >>= \(prefix, rest) ->
-        case prefix of
-          "ghc"   -> return (updateGhc, rest)
-          "cabal" -> return (updateCabal, rest)
-          _       -> err
-      setter <- splitChar '=' s1 >>= \(prefix, rest) ->
-        case prefix of
-          "size" -> case reads rest of
-            [(size, "")] -> return (setSize size)
-            _            -> err
-          "version" -> return (setVersion rest)
-          "url"     -> return (setUrl rest)
-          "sha1"    -> return (setSha1 rest)
-          _         -> err
-      return (updater setter acc)
-    updateGhc f x = x { releasesGhc = f (releasesGhc x) }
-    updateCabal f x = x { releasesCabal = f (releasesCabal x) }
-    setVersion x r = r { releaseVersion = x }
-    setUrl x r = r { releaseUrl = x }
-    setSha1 x r = r { releaseSha1 = x }
-    setSize x r = r { releaseSize = x }
+    showHelp = "--help" `elem` argv
+
+options :: [OptDescr (Releases -> IO Releases)]
+options = do
+  (prodName, updateProd) <-
+    [ ("ghc", \f x -> do
+        release <- f (releasesGhc x)
+        return x { releasesGhc = release })
+    , ("cabal", \f x -> do
+        release <- f (releasesCabal x)
+        return x { releasesCabal = release })
+    ]
+  (setterName, setter) <-
+    [ ("url", \arg r -> return r { releaseUrl = arg })
+    , ("version", \arg r -> return r { releaseVersion = arg })
+    , ("sha1", \arg r -> return r { releaseSha1 = arg })
+    , ("size", \arg r -> case reads arg of
+        [(size, "")] -> return r { releaseSize = size }
+        _            ->
+          die [ "option --" ++ prodName ++
+                "-size requires a number argument SIZE\n"])
+    ]
+  return $ Option [] [prodName ++ "-" ++ setterName]
+             (ReqArg (updateProd . setter) (map toUpper setterName))
+             (prodName ++ " " ++ setterName)
 
 main :: IO ()
 main = do
-  releases <- parseReleases latestReleases <$> getArgs
+  releases <- getArgs >>= parseReleases latestReleases
   appRule <- buildApp . buildState releases <$> getCurrentDirectory
   runRule appRule
