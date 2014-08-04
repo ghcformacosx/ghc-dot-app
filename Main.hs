@@ -332,7 +332,7 @@ die errs = do
 parseReleases :: Releases -> [String] -> IO Releases
 parseReleases releases argv = case getOpt Permute options argv of
   (opts, [], []) -> foldM (flip id) releases opts
-  (_, _, errs)    -> die (if showHelp then [] else errs)
+  (_, _, errs)   -> die (if showHelp then [] else errs)
   where
     showHelp = "--help" `elem` argv
 
