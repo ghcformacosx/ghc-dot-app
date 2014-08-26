@@ -16,7 +16,6 @@ module Main (main) where
 import Data.Char (toUpper)
 import Control.Applicative ((<$>))
 import System.Environment (getArgs)
-import Data.List (foldl')
 import System.Directory
   ( getCurrentDirectory, getDirectoryContents, doesDirectoryExist
   , setCurrentDirectory, createDirectoryIfMissing, doesFileExist
