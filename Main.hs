@@ -257,18 +257,21 @@ sha1 fileName = do
 downloadRelease :: (BuildState -> Release) -> BuildState -> Rule
 downloadRelease getRel bs@(BuildState { buildDownloadDir }) = defRule
   { ruleName         = "download " ++ releaseFileName rel
-  , ruleCheck        = andM
-      [ doesFileExist tarFileName
-      , (releaseSize rel ==) . fromIntegral . fileSize <$> getFileStatus tarFileName
-      , (releaseSha1 rel ==) <$> sha1 tarFileName
-      ]
+  , ruleCheck        = checkDownload
   , ruleDependencies = [ ensureDir buildDownloadDir ]
-  , ruleRun          =
+  , ruleRun          = do
     callProcess "curl" [ "-L", "-s", "-o", tarFileName, releaseUrl rel ]
+    didFail <- not <$> checkDownload
+    when didFail . fail $ "release tarball did not match expected size or sha1"
   }
   where
     tarFileName = buildDownloadDir </> releaseFileName rel
     rel = getRel bs
+    checkDownload = andM
+      [ doesFileExist tarFileName
+      , (releaseSize rel ==) . fromIntegral . fileSize <$> getFileStatus tarFileName
+      , (releaseSha1 rel ==) <$> sha1 tarFileName
+      ]
 
 unpackRelease :: (BuildState -> Release)
               -> FilePath
