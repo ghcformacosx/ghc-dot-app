@@ -264,7 +264,7 @@ downloadRelease getRel bs@(BuildState { buildDownloadDir }) = defRule
       ]
   , ruleDependencies = [ ensureDir buildDownloadDir ]
   , ruleRun          =
-    callProcess "curl" [ "-s", "-o", tarFileName, releaseUrl rel ]
+    callProcess "curl" [ "-L", "-s", "-o", tarFileName, releaseUrl rel ]
   }
   where
     tarFileName = buildDownloadDir </> releaseFileName rel
