@@ -3,8 +3,8 @@
 
 {-
 
-This builds a relocatable ghc-7.8.3.app in dist/build,
-including cabal-install 1.20.0.3
+This builds a relocatable ghc-7.8.4.app in dist/build,
+including cabal-install 1.22.0.0
 
 TODO:
 
@@ -43,9 +43,9 @@ import System.Console.GetOpt
 
 -- Layout:
 --
---   dist/download/[ghc-7.8.3-*.tar.xz]
---   dist/unpack/ghc-7.8.3
---   dist/build/ghc-[7.8.3].app/Contents/{lib,bin}/
+--   dist/download/[ghc-7.8.4-*.tar.bz2]
+--   dist/unpack/ghc-7.8.4
+--   dist/build/ghc-[7.8.4].app/Contents/{lib,bin}/
 --
 
 data BuildState = BuildState
@@ -121,18 +121,18 @@ defRule = Rule
 
 latestGhc :: Release
 latestGhc = Release
-  { releaseVersion = "7.8.3"
-  , releaseUrl     = "https://www.haskell.org/ghc/dist/7.8.3/ghc-7.8.3-x86_64-apple-darwin.tar.xz"
-  , releaseSha1    = "d55a671482614cbd3c12e4594437aedfd78f47de"
-  , releaseSize    = 69371660
+  { releaseVersion = "7.8.4"
+  , releaseUrl     = "http://www.ozonehouse.com/mark/platform/ghc-7.8.4-x86_64-apple-darwin.tar.bz2"
+  , releaseSha1    = "b7aff3983e9005b74d90c5a4fd7c837f9e752923"
+  , releaseSize    = 129602990
   }
 
 latestCabal :: Release
 latestCabal = Release
-  { releaseVersion = "1.20.0.3"
-  , releaseUrl     = "http://www.haskell.org/cabal/release/cabal-install-1.20.0.3/cabal-1.20.0.3-x86_64-apple-darwin-mavericks.tar.gz"
-  , releaseSha1    = "e64789827dbc1b32db05a9e6cdb9366d8cc7f4da"
-  , releaseSize    = 2961724
+  { releaseVersion = "1.22.0.0"
+  , releaseUrl     = "https://www.haskell.org/cabal/release/cabal-install-1.22.0.0/cabal-1.22.0.0-x86_64-apple-darwin-mavericks.tar.gz"
+  , releaseSha1    = "f290db731fec9679f60228bc77cb1a9693d0719a"
+  , releaseSize    = 3988319
   }
 
 latestReleases :: Releases
@@ -314,7 +314,7 @@ installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
   , ruleRun          = copyFile cabalSrc cabalDest 
   }
   where
-    cabalSrc  = buildUnpackDir </> "dist" </> "build" </> "cabal" </> "cabal"
+    cabalSrc  = buildUnpackDir </> "cabal"
     cabalDest = buildBinDir </> "cabal"
 
 buildApp :: BuildState -> Rule
