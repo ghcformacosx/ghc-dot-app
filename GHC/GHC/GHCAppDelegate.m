@@ -8,21 +8,72 @@
 
 #import "GHCAppDelegate.h"
 #import <JavaScriptCore/JavaScriptCore.h>
+#import <OpenDirectory/OpenDirectory.h>
 
-typedef NS_ENUM(NSInteger, RelevantPathIndex) {
-    kLoginGHCPath,
-    kLoginPATH,
-    kOtherGHCPath,
-    kOtherPATH,
-    kXcodePath
-};
+static NSString *getUserShell() {
+    // We can't trust the environment to reflect the current shell, so get
+    // it from OpenDirectory.
+    ODSession *session = [ODSession defaultSession];
+    ODNode *node;
+    ODQuery *query;
+    NSError *err;
+    NSString *defaultShell = [NSProcessInfo processInfo].environment[@"SHELL"];
+    node = [ODNode nodeWithSession:session type:kODNodeTypeLocalNodes error:&err];
+    if (!node) {
+        NSLog(@"err getting node: %@", err);
+        return defaultShell;
+    }
+    query = [ODQuery queryWithNode:node
+                    forRecordTypes:kODRecordTypeUsers
+                         attribute:kODAttributeTypeRecordName
+                         matchType:kODMatchEqualTo
+                       queryValues:NSUserName()
+                  returnAttributes:kODAttributeTypeStandardOnly
+                    maximumResults:1
+                             error:&err];
+    if (!query) {
+        NSLog(@"err getting query: %@", err);
+        return defaultShell;
+    }
+    NSArray *results = [query resultsAllowingPartial:NO error:&err];
+    if (!results) {
+        NSLog(@"err getting results: %@", err);
+        return defaultShell;
+    }
+    for (ODRecord *result in results) {
+        NSArray *vals = [result valuesForAttribute:kODAttributeTypeUserShell error:&err];
+        if (!vals) {
+            NSLog(@"err getting UserShell: %@", err);
+        } else if (vals.count > 0) {
+            return [vals firstObject];
+        }
+    }
+    return defaultShell;
+}
 
-static const char* relevant_path_commands =
-    /* kLoginGHCPath */ "bash -lc 'which ghc || echo;"
-    /* kLoginPATH    */ "echo $PATH';"
-    /* kOtherGHCPath */ "if [ -r ~/.bashrc ]; then source ~/.bashrc; fi; which ghc || echo;"
-    /* kOtherPath    */ "echo $PATH;"
-    /* kXcodePath    */ "xcode-select -p 2>/dev/null || echo";
+static NSDictionary *parseShellOutput(NSString *launchPath) {
+    NSMutableDictionary *dict = [NSMutableDictionary new];
+    NSPipe *pipe = [NSPipe pipe];
+    NSFileHandle *file = pipe.fileHandleForReading;
+    NSTask *task = [NSTask new];
+    task.launchPath = getUserShell();
+    task.arguments = @[launchPath];
+    task.standardOutput = pipe;
+    [task launch];
+    NSData *data = [file readDataToEndOfFile];
+    [file closeFile];
+    NSString *output = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+    NSArray *lines = [output componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    for (NSString *line in lines) {
+        NSString *key;
+        NSScanner *scanner = [NSScanner scannerWithString:line];
+        if (![scanner scanUpToString:@": " intoString:&key]) continue;
+        if (![scanner scanString:@": " intoString:nil]) continue;
+        NSString *value = [line substringFromIndex:scanner.scanLocation];
+        dict[key] = value;
+    }
+    return dict;
+}
 
 static NSMenu *mkMenu(NSString *title, NSArray *items) {
     NSMenu *menu = [NSMenu new];
@@ -63,7 +114,7 @@ static NSMenu *mkMainMenu(NSArray *subMenus) {
         /* initialize WebKit debugging */
         [[NSUserDefaults standardUserDefaults] setBool:TRUE forKey:@"WebKitDeveloperExtras"];
         [[NSUserDefaults standardUserDefaults] synchronize];
-        
+
         /* get some metadata about the app */
         NSBundle *bundle = [NSBundle mainBundle];
         NSString *appName = bundle.infoDictionary[@"CFBundleName"];
@@ -94,11 +145,11 @@ static NSMenu *mkMainMenu(NSArray *subMenus) {
                    @[mkItem(@"GHC Documentation", @selector(openDocs:), @""),
                      mkItem(@"Haskell for Mac OS X Homepage", @selector(openHomepage:), @""),
                      mkItem(@"Report an Issue", @selector(openIssue:), @"")])
-                     
+
         ]);
-        
+
         [NSApp setMainMenu:mainMenu];
-        
+
         /* Set up the window and webView */
         NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 700, 400)
                                                   styleMask:NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
@@ -136,13 +187,9 @@ static NSMenu *mkMainMenu(NSArray *subMenus) {
     return appURL ? appURL.path : [NSBundle mainBundle].bundlePath;
 }
 
-- (NSArray *)ghcPaths
+- (NSDictionary *)ghcPaths
 {
-    FILE *stdout = popen(relevant_path_commands, "r");
-    NSFileHandle *fh = [[NSFileHandle alloc] initWithFileDescriptor:fileno(stdout)];
-    NSString *output = [[NSString alloc] initWithData:[fh readDataToEndOfFile] encoding:NSUTF8StringEncoding];
-    pclose(stdout);
-    return [[output componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] subarrayWithRange:NSMakeRange(0, 5)];
+    return parseShellOutput([[NSBundle mainBundle] pathForResource:@"read_environment" ofType:@"sh"]);
 }
 
 - (void)webView:(WebView *)webView decidePolicyForNavigationAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id<WebPolicyDecisionListener>)listener
@@ -159,8 +206,8 @@ static NSMenu *mkMainMenu(NSArray *subMenus) {
             [self refresh:webView];
         } else if ([url.host isEqualToString:@"open-docs"]) {
             [self openDocs:webView];
-        } else if ([url.host isEqualToString:@"open-bash-man"]) {
-            [self openBashMan:webView];
+        } else if ([url.host isEqualToString:@"man"]) {
+            [self openMan:url.lastPathComponent sender:webView];
         } else if ([url.host isEqualToString:@"append-profile"]) {
             [self appendProfile:url.lastPathComponent sender:webView];
         }
@@ -185,25 +232,19 @@ static NSMenu *mkMainMenu(NSArray *subMenus) {
     }
     NSDictionary *infoDictionary = bundle.infoDictionary;
     NSDictionary *env = [NSProcessInfo processInfo].environment;
-    NSMutableDictionary *bashPaths = [NSMutableDictionary new];
+    NSMutableDictionary *profiles = [NSMutableDictionary new];
     NSString *homeDir = NSHomeDirectory();
-    for (NSString *bashFile in @[@".bashrc", @".bash_profile", @".bash_login", @".profile"]) {
-        bashPaths[[bashFile substringFromIndex:1]] = @([fileManager fileExistsAtPath:[homeDir stringByAppendingPathComponent:bashFile]]);
+    for (NSString *profilePath in @[@".bashrc", @".bash_profile", @".bash_login", @".profile", @".zshenv"]) {
+        profiles[[profilePath substringFromIndex:1]] = @([fileManager fileExistsAtPath:[homeDir stringByAppendingPathComponent:profilePath]]);
     };
-    NSArray *ghcPaths = [self ghcPaths];
     NSString *bundlePath = [self bundlePath];
     NSDictionary *info = @{@"bundleName"    : infoDictionary[@"CFBundleName"],
                            @"bundleVersion" : infoDictionary[@"CFBundleShortVersionString"],
                            @"appName"       : bundlePath.lastPathComponent.stringByDeletingPathExtension,
                            @"bundlePath"    : bundlePath,
                            @"environment"   : env,
-                           @"loginGHC"      : ghcPaths[kLoginGHCPath],
-                           @"loginPATH"     : ghcPaths[kLoginPATH],
-                           @"otherGHC"      : ghcPaths[kOtherGHCPath],
-                           @"otherPATH"     : ghcPaths[kOtherPATH],
-                           @"xcodePath"     : ghcPaths[kXcodePath],
-                           @"isBash"        : @([@"/bin/bash" isEqualToString:env[@"SHELL"]]),
-                           @"bashPaths"     : bashPaths,
+                           @"paths"         : self.ghcPaths,
+                           @"profiles"      : profiles,
                            @"inDownloadsDir": @(inDownloads)};
     // NSDictionary isn't bridged as you would expect, so this happened.
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:info options:0 error:NULL];
@@ -242,7 +283,7 @@ static NSMenu *mkMainMenu(NSArray *subMenus) {
 
 - (void)openHomepage:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://ghcformacosx.github.io/"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://ghcformacosx.github.io/"]];
 }
 
 - (void)openIssue:(id)sender
@@ -262,9 +303,10 @@ static NSMenu *mkMainMenu(NSArray *subMenus) {
     [NSApp terminate:self];
 }
 
-- (void)openBashMan:(id)sender
+- (void)openMan:(NSString *)page sender:(id)sender
 {
-    [[[NSAppleScript alloc] initWithSource:@"tell application \"Terminal\" to do script \"man 1 bash; exit\""] executeAndReturnError:nil];
+    NSString *script = [NSString stringWithFormat:@"tell application \"Terminal\" to do script \"man 1 %@; exit\"", page];
+    [[[NSAppleScript alloc] initWithSource:script] executeAndReturnError:nil];
     [[NSWorkspace sharedWorkspace] launchApplication:@"Terminal"];
 }
 
@@ -272,17 +314,17 @@ static NSMenu *mkMainMenu(NSArray *subMenus) {
 {
 }
 
-- (void)appendProfile:(NSString *)bashPath sender:(id)sender
+- (void)appendProfile:(NSString *)profilePath sender:(id)sender
 {
-    NSString *path = [NSHomeDirectory() stringByAppendingPathComponent:[@"." stringByAppendingString:bashPath]];
+    NSString *path = [NSHomeDirectory() stringByAppendingPathComponent:[@"." stringByAppendingString:profilePath]];
     NSAlert *sheet = [NSAlert new];
     if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
-        sheet.informativeText = [NSString stringWithFormat:@"Are you sure you want to append this code to your ~/.%@? A backup will be saved to ~/.%@.ghc.orig", bashPath, bashPath];
-        sheet.messageText = [NSString stringWithFormat:@"Confirm .%@ modification", bashPath];
+        sheet.informativeText = [NSString stringWithFormat:@"Are you sure you want to append this code to your ~/.%@? A backup will be saved to ~/.%@.ghc.orig", profilePath, profilePath];
+        sheet.messageText = [NSString stringWithFormat:@"Confirm .%@ modification", profilePath];
         [sheet addButtonWithTitle:@"Modify"].tag = 0;
     } else {
-        sheet.informativeText = [NSString stringWithFormat:@"Are you sure you want to create a new ~/.%@?", bashPath];
-        sheet.messageText = [NSString stringWithFormat:@"Confirm .%@ creation", bashPath];
+        sheet.informativeText = [NSString stringWithFormat:@"Are you sure you want to create a new ~/.%@?", profilePath];
+        sheet.messageText = [NSString stringWithFormat:@"Confirm .%@ creation", profilePath];
         [sheet addButtonWithTitle:@"Create"].tag = 0;
     }
     [sheet addButtonWithTitle:@"Cancel"].tag = -1;
