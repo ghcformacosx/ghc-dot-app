@@ -122,7 +122,7 @@ defRule = Rule
 latestGhc :: Release
 latestGhc = Release
   { releaseVersion = "7.10.1"
-  , releaseUrl     = "http://www.ozonehouse.com/mark/platform/ghc-7.10.1-x86_64-apple-darwin.tar.bz2"
+  , releaseUrl     = "https://halcyon.global.ssl.fastly.net/original/ghc-7.10.1-x86_64-apple-darwin.tar.bz2"
   , releaseSha1    = "5c7282f955020e92dc83560af9e7e3eadc2bd58f"
   , releaseSize    = 146558980
   }
