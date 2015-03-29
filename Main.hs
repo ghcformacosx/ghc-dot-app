@@ -3,7 +3,7 @@
 
 {-
 
-This builds a relocatable ghc-7.8.4.app in dist/build,
+This builds a relocatable ghc-$version.app in dist/build,
 including cabal-install 1.22.0.0
 
 TODO:
@@ -43,9 +43,9 @@ import System.Console.GetOpt
 
 -- Layout:
 --
---   dist/download/[ghc-7.8.4-*.tar.bz2]
---   dist/unpack/ghc-7.8.4
---   dist/build/ghc-[7.8.4].app/Contents/{lib,bin}/
+--   dist/download/[ghc-$version-*.tar.bz2]
+--   dist/unpack/ghc-$version
+--   dist/build/ghc-$version.app/Contents/{lib,bin}/
 --
 
 data BuildState = BuildState
@@ -121,10 +121,10 @@ defRule = Rule
 
 latestGhc :: Release
 latestGhc = Release
-  { releaseVersion = "7.8.4"
-  , releaseUrl     = "http://www.ozonehouse.com/mark/platform/ghc-7.8.4-x86_64-apple-darwin.tar.bz2"
-  , releaseSha1    = "b7aff3983e9005b74d90c5a4fd7c837f9e752923"
-  , releaseSize    = 129602990
+  { releaseVersion = "7.10.1"
+  , releaseUrl     = "http://www.ozonehouse.com/mark/platform/ghc-7.10.1-x86_64-apple-darwin.tar.bz2"
+  , releaseSha1    = "5c7282f955020e92dc83560af9e7e3eadc2bd58f"
+  , releaseSize    = 146558980
   }
 
 latestCabal :: Release
@@ -178,7 +178,7 @@ fixupScript :: FilePath -> FilePath -> IO ()
 fixupScript buildPrefixDir fileName =
   B.readFile fileName >>=
     either (const $ return ()) replaceText . T.decodeUtf8'
-  where    
+  where
     prefixDir = T.pack buildPrefixDir
     binsh = "#!/bin/sh\n"
     replaceText s = when (binsh `T.isPrefixOf` s) $ do
@@ -311,7 +311,7 @@ installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
   { ruleName         = "install cabal " ++ releaseVersion (buildCabalRel bs)
   , ruleCheck        = doesFileExist cabalDest
   , ruleDependencies = [ unpackRelease buildCabalRel cabalSrc bs ]
-  , ruleRun          = copyFile cabalSrc cabalDest 
+  , ruleRun          = copyFile cabalSrc cabalDest
   }
   where
     cabalSrc  = buildUnpackDir </> "cabal"
