@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C45A2C0E1A993603008FFA65 /* read_environment.sh in Resources */ = {isa = PBXBuildFile; fileRef = C45A2C0D1A993603008FFA65 /* read_environment.sh */; };
 		C46738D019437E63005B97AE /* html in Resources */ = {isa = PBXBuildFile; fileRef = C46738CF19437E63005B97AE /* html */; };
 		C4CD2512192EC39700158BFF /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4CD2511192EC39700158BFF /* Cocoa.framework */; };
 		C4CD251C192EC39700158BFF /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C4CD251A192EC39700158BFF /* InfoPlist.strings */; };
@@ -39,6 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C45A2C0D1A993603008FFA65 /* read_environment.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = read_environment.sh; sourceTree = "<group>"; };
 		C46738CF19437E63005B97AE /* html */ = {isa = PBXFileReference; lastKnownFileType = folder; path = html; sourceTree = "<group>"; };
 		C4CD250E192EC39700158BFF /* GHC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GHC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4CD2511192EC39700158BFF /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -124,6 +126,7 @@
 		C4CD2517192EC39700158BFF /* GHC */ = {
 			isa = PBXGroup;
 			children = (
+				C45A2C0D1A993603008FFA65 /* read_environment.sh */,
 				C46738CF19437E63005B97AE /* html */,
 				C4CD2523192EC39700158BFF /* GHCAppDelegate.h */,
 				C4CD2524192EC39700158BFF /* GHCAppDelegate.m */,
@@ -264,6 +267,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C45A2C0E1A993603008FFA65 /* read_environment.sh in Resources */,
 				C4CD251C192EC39700158BFF /* InfoPlist.strings in Resources */,
 				C4CD252A192EC39700158BFF /* Images.xcassets in Resources */,
 				C4CD2522192EC39700158BFF /* Credits.rtf in Resources */,

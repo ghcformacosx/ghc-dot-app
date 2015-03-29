@@ -3,7 +3,7 @@
 Want to try Haskell on your Mac without having to use homebrew or
 even install anything globally? Download a self-contained GHC release here!
 
-* [ghc-7.8.4-r0.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.4-r0/ghc-7.8.4-r0.zip)
+* [ghc-7.8.4-r1.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.8.4-r1/ghc-7.8.4-r1.zip)
 
 # What it includes
 
@@ -57,6 +57,13 @@ $ (cd GHC; xcodebuild)
 
 Will produce a signed release build at `./GHC/build/Release/GHC.app`,
 if you have setup a signing identity with a Developer ID certificate.
+
+If for some reason there is no icon, first a few obsceneties about Xcode
+under your breath, and then do a clean build like this:
+
+```bash
+$ (cd GHC; xcodebuild clean build)
+```
 
 # TODO
 

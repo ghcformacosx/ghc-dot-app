@@ -3,61 +3,10 @@
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="main.css">
+<script src="react-0.12.2/react-with-addons.js"></script>
+<script src="react-0.12.2/JSXTransformer.js"></script>
+<script src="main.jsx" type="text/jsx;harmony=true"></script>
 </head>
 <body>
-<script id="page-template" type="text/x-underscore-template">
-<header>
-<img src="logo.svg" class="logo">
-<p>This app is a container for GHC and cabal-install.</p>
-<p>To use it, move the application folder somewhere stable such as your
-   Applications folder, and then add it to your <code>$PATH</code></p>
-</header>
-<section>
-<% var script = _.find(['bash_profile', 'bash_login', 'profile'], function (k) { return bashPaths[k]; }); %>
-<% if (script !== undefined) { %>
-    <p><button data-url="ghcdotapp://append-profile/<%- script %>">Append to ~/.<%- script %></button> or manually append the following to your <code>~/.<%- script %></code> file </p>
-<% } else { %>
-    <p><button data-url="ghcdotapp://append-profile/profile">Create ~/.profile</button> or manually copy the following to a new <code>~/.profile</code> file</p>
-<% } %>
-<div class="code-box"><code># Add GHC <%- bundleVersion %> to the PATH, via http://ghcformacosx.github.io/
-export GHC_DOT_APP="<%- bundlePath %>"
-if [ -d "$GHC_DOT_APP" ]; then
-    export PATH="${HOME}/.cabal/bin:${GHC_DOT_APP}/Contents/bin:${PATH}"
-fi</code></div>
-<p>
-    You can read more about the bash startup sequence in the INVOCATION
-    section of bash documentation accessible with <a href="ghcdotapp://open-bash-man">'man bash'</a>.
-</p>
-<nav>
-    <button data-url="ghcdotapp://refresh">Refresh Checklist</button>
-    <button data-url="ghcdotapp://relaunch">Relaunch App</button>
-    <button data-url="ghcdotapp://open-docs">Open GHC Docs</button>
-</nav>
-<ul class="checklist">
-    <% if (xcodePath) { %>
-        <li class="check-mark">Xcode is installed at <code><%- xcodePath %></code></li>
-    <% } else { %>
-        <li class="warning">Xcode is not installed (<a href="ghcdotapp://install-xcode">Install Xcode</a>)</li>
-    <% } %>
-    <% if (inDownloadsDir) { %>
-        <li class="warning"><%- appName %> (<a href="ghcdotapp://show-in-finder">Show in finder</a>) is in your Downloads folder. You should move it to a stable location such as your Applications folder and then <a href="ghcdotapp://relaunch">restart this application</a>. </li>
-    <% } else { %>
-        <li class="check-mark"><%- appName %> looks like it's in a stable location at: <code><%- bundlePath %></code>
-    <% } %>
-    <% if (!isBash) { %>
-        <li class="warning">These instructions were written for users who use the default <code>SHELL</code> (<code>/bin/bash</code>), not <code><%- environment.SHELL %></code>. Hopefully you know what you're doing &#128517;</li>
-    <% } %>
-    <% if (loginGHC.indexOf(context.bundlePath) === 0) { %>
-        <li class="check-mark">Found this GHC on your <code>PATH</code> at: <code><%- loginGHC %></code></li>
-    <% } else if (loginGHC) { %>
-        <li class="warning">Found another GHC on your <code>PATH</code> at: <code><%- loginGHC %></code>, follow the above instructions to override it.</li>
-    <% } else { %>
-        <li class="warning">GHC not found on your <code>PATH</code>, follow the above instructions to add it.</li>
-    <% } %>
-</ul>
-</section>
-</script>
-<script src="underscore.js"></script>
-<script src="main.js"></script>
 </body>
 </html>
