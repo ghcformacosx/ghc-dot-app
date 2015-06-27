@@ -21,7 +21,7 @@ import System.Directory
   , setCurrentDirectory, createDirectoryIfMissing, doesFileExist
   , copyFile
   )
-import System.FilePath ((</>), takeExtension, takeFileName)
+import System.FilePath ((</>), dropExtension, takeExtension, takeFileName)
 import System.Process (callProcess, readProcess)
 import Control.Monad (when, filterM, foldM)
 import System.Posix.Files
@@ -51,6 +51,7 @@ import System.Console.GetOpt
 data BuildState = BuildState
   { buildRel             :: Release
   , buildCabalRel        :: Release
+  , buildStackRel        :: Release
   , buildDistDir         :: String
   , buildDownloadDir     :: String
   , buildUnpackDir       :: String
@@ -67,6 +68,7 @@ data BuildState = BuildState
 
 data Releases = Releases
   { releasesCabal :: Release
+  , releasesStack :: Release
   , releasesGhc   :: Release
   }
 
@@ -92,11 +94,13 @@ buildState releases here = b
   where
     rel = releasesGhc releases
     cabalRel = releasesCabal releases
+    stackRel = releasesStack releases
     distDir = here </> "dist"
     n = buildGhcName b
     b = BuildState
       { buildRel             = rel
       , buildCabalRel        = cabalRel
+      , buildStackRel        = stackRel
       , buildDistDir         = distDir
       , buildDownloadDir     = distDir </> "download"
       , buildUnpackDir       = distDir </> "unpack"
@@ -135,9 +139,18 @@ latestCabal = Release
   , releaseSize    = 3988319
   }
 
+latestStack :: Release
+latestStack = Release
+  { releaseVersion = "0.1.1.0"
+  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v0.1.1.0/stack-0.1.1.0-x86_64-osx.gz"
+  , releaseSha1    = "2802f8b3a7d42fccf61d8059efb6ae78c8f65270"
+  , releaseSize    = 6980326
+  }
+
 latestReleases :: Releases
 latestReleases = Releases
   { releasesCabal = latestCabal
+  , releasesStack = latestStack
   , releasesGhc   = latestGhc
   }
 
@@ -273,6 +286,24 @@ downloadRelease getRel bs@(BuildState { buildDownloadDir }) = defRule
       , (releaseSha1 rel ==) <$> sha1 tarFileName
       ]
 
+gunzipRelease :: (BuildState -> Release)
+              -> FilePath
+              -> BuildState -> Rule
+gunzipRelease getRel unpackDest bs@(BuildState
+    { buildUnpackDir, buildDownloadDir }) = defRule
+  { ruleName         = "unzip " ++ releaseFileName rel
+  , ruleCheck        = doesDirectoryExist unpackDest
+  , ruleDependencies = [ downloadRelease getRel bs
+                       , ensureDir buildUnpackDir ]
+  , ruleRun          = withDir buildUnpackDir $ do
+      callProcess "gzip" [ "-d", "-k", gzipFileName ]
+      callProcess "mv" [ dropExtension gzipFileName, "stack" ]
+      callProcess "chmod" [ "+x", "stack" ]
+  }
+  where
+    rel = getRel bs
+    gzipFileName = buildDownloadDir </> releaseFileName rel
+
 unpackRelease :: (BuildState -> Release)
               -> FilePath
               -> BuildState -> Rule
@@ -317,11 +348,23 @@ installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
     cabalSrc  = buildUnpackDir </> "cabal"
     cabalDest = buildBinDir </> "cabal"
 
+installStack :: BuildState -> Rule
+installStack bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
+  { ruleName         = "install stack " ++ releaseVersion (buildStackRel bs)
+  , ruleCheck        = doesFileExist stackDest
+  , ruleDependencies = [ gunzipRelease buildStackRel stackSrc bs ]
+  , ruleRun          = copyFile stackSrc stackDest
+  }
+  where
+    stackSrc  = buildUnpackDir </> "stack"
+    stackDest = buildBinDir </> "stack"
+
 buildApp :: BuildState -> Rule
 buildApp bs = defRule
   { ruleName         = "building " ++ buildAppDir bs
   , ruleDependencies = map ($ bs) [ buildRelease
                                   , installCabal
+                                  , installStack
                                   , sanityCheck ]
   }
 
@@ -347,6 +390,9 @@ options = do
     , ("cabal", \f x -> do
         release <- f (releasesCabal x)
         return x { releasesCabal = release })
+    , ("stack", \f x -> do
+        release <- f (releasesStack x)
+        return x { releasesStack = release })
     ]
   (setterName, setter) <-
     [ ("url", \arg r -> return r { releaseUrl = arg })

@@ -172,7 +172,7 @@
 /* Begin PBXLegacyTarget section */
 		C4CD2545192EC84C00158BFF /* Run build script */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "-l -c 'runhaskell ./Main.hs'";
+			buildArgumentsString = "-l -c 'make ghc'";
 			buildConfigurationList = C4CD2546192EC84C00158BFF /* Build configuration list for PBXLegacyTarget "Run build script" */;
 			buildPhases = (
 			);
