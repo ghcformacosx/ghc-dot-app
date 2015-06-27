@@ -15,7 +15,7 @@ module Main (main) where
 
 import Data.Char (toUpper)
 import Control.Applicative ((<$>))
-import System.Environment (getArgs)
+import System.Environment (getArgs, unsetEnv)
 import System.Directory
   ( getCurrentDirectory, getDirectoryContents, doesDirectoryExist
   , setCurrentDirectory, createDirectoryIfMissing, doesFileExist
@@ -364,6 +364,9 @@ options = do
 
 main :: IO ()
 main = do
+  -- this is necessary to allow `stack exec main` to do the right thing
+  -- without --no-ghc-package-path
+  unsetEnv "GHC_PACKAGE_PATH"
   releases <- getArgs >>= parseReleases latestReleases
   appRule <- buildApp . buildState releases <$> getCurrentDirectory
   runRule appRule
