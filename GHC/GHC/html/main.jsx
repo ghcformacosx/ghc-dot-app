@@ -44,7 +44,7 @@ var CodeBox = React.createClass(
       [ `# Add GHC ${bundleVersion} to the PATH, via https://ghcformacosx.github.io/`
       , `export GHC_DOT_APP="${bundlePath}"`
       , 'if [ -d "$GHC_DOT_APP" ]; then'
-      , '  export PATH="${HOME}/.cabal/bin:${GHC_DOT_APP}/Contents/bin:${PATH}"'
+      , '  export PATH="${HOME}/.local/bin:${HOME}/.cabal/bin:${GHC_DOT_APP}/Contents/bin:${PATH}"'
       , 'fi'
       , ''
       ].join('\n');
@@ -136,7 +136,7 @@ var App = React.createClass({
       <div>
         <header>
           <img src="logo.svg" className="logo" />
-          <p>This app is a container for GHC and cabal-install.</p>
+          <p>This app is a container for GHC, cabal-install and stack.</p>
           <p>To use it, move the application folder somewhere stable such as your
              Applications folder, and then add it to your <code>$PATH</code></p>
         </header>

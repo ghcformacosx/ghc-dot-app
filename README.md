@@ -9,6 +9,7 @@ even install anything globally? Download a self-contained GHC release here!
 
 * GHC 7.10.1
 * cabal-install 1.22.0.0 (just the binary)
+* stack 1.1.1.0 (just the binary)
 * HTML documentation
 * man pages
 
@@ -17,22 +18,19 @@ even install anything globally? Download a self-contained GHC release here!
 To build from this repository you will need an existing installation of
 GHC such as the self-contained release above.
 
-If you do not have it already, you will also need the text package:
-
-```bash
-$ cabal install text
-```
+The `Makefile` will take care of satisfying any dependencies you might
+need except for Xcode. It leverages `stack` to do everything.
 
 ## Minimal (no GUI helper)
 
 This will build a relocatable ghc-7.10.1.app in ./dist/build using
-the binaries of GHC and cabal-install from haskell.org. This does not
-include the GUI helper.
+the binaries of GHC and cabal-install from haskell.org and stack from
+GitHub. This does not include the GUI helper.
 
 USAGE:
 
 ```bash
-$ runhaskell Main.hs
+$ make
 ```
 
 To clean up:
@@ -44,7 +42,7 @@ $ rm -rf ./dist/
 Add this GHC to your PATH (assuming it has moved to /Applications):
 
 ```bash
-export PATH=$HOME/.cabal/bin:/Applications/ghc-7.10.1.app/Contents/bin:$PATH
+export PATH=$HOME/.local/bin:$HOME/.cabal/bin:/Applications/ghc-7.10.1.app/Contents/bin:$PATH
 ```
 
 # Full (GUI helper with code signing)
