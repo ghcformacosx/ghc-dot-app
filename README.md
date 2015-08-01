@@ -9,7 +9,7 @@ even install anything globally? Download a self-contained GHC release here!
 
 * GHC 7.10.2
 * cabal-install 1.22.6.0 (just the binary)
-* stack 1.1.2.0 (just the binary)
+* stack 0.1.2.0 (just the binary)
 * HTML documentation
 * man pages
 
