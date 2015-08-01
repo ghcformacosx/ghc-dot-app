@@ -125,26 +125,26 @@ defRule = Rule
 
 latestGhc :: Release
 latestGhc = Release
-  { releaseVersion = "7.10.1"
-  , releaseUrl     = "https://halcyon.global.ssl.fastly.net/original/ghc-7.10.1-x86_64-apple-darwin.tar.bz2"
-  , releaseSha1    = "5c7282f955020e92dc83560af9e7e3eadc2bd58f"
-  , releaseSize    = 146558980
+  { releaseVersion = "7.10.2"
+  , releaseUrl     = "http://downloads.haskell.org/~ghc/7.10.2/ghc-7.10.2-x86_64-apple-darwin.tar.xz"
+  , releaseSha1    = "57cf049a5ff5f587a23e567628d50319e74b8dc3"
+  , releaseSize    = 86840016
   }
 
 latestCabal :: Release
 latestCabal = Release
-  { releaseVersion = "1.22.0.0"
-  , releaseUrl     = "https://www.haskell.org/cabal/release/cabal-install-1.22.0.0/cabal-1.22.0.0-x86_64-apple-darwin-mavericks.tar.gz"
-  , releaseSha1    = "f290db731fec9679f60228bc77cb1a9693d0719a"
-  , releaseSize    = 3988319
+  { releaseVersion = "1.22.6.0"
+  , releaseUrl     = "https://s3.halcyon.sh/osx-10.9-x86_64/halcyon-cabal-1.22.6.0.tar.gz"
+  , releaseSha1    = "e941f12d5fde8820eb8374637712add1e168be14"
+  , releaseSize    = 4583511
   }
 
 latestStack :: Release
 latestStack = Release
-  { releaseVersion = "0.1.1.0"
-  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v0.1.1.0/stack-0.1.1.0-x86_64-osx.gz"
-  , releaseSha1    = "2802f8b3a7d42fccf61d8059efb6ae78c8f65270"
-  , releaseSize    = 6980326
+  { releaseVersion = "0.1.2.0"
+  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-x86_64-osx.gz"
+  , releaseSha1    = "cc326959e54c824793973ff5cea4f5c1781e90a1"
+  , releaseSize    = 7181915
   }
 
 latestReleases :: Releases
@@ -345,7 +345,7 @@ installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
   , ruleRun          = copyFile cabalSrc cabalDest
   }
   where
-    cabalSrc  = buildUnpackDir </> "cabal"
+    cabalSrc  = buildUnpackDir </> "bin" </> "cabal"
     cabalDest = buildBinDir </> "cabal"
 
 installStack :: BuildState -> Rule

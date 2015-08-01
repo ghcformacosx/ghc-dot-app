@@ -1,4 +1,4 @@
-STACK_VER=0.1.1.0
+STACK_VER=0.1.2.0
 STACK_URL=https://github.com/commercialhaskell/stack/releases/download/v$(STACK_VER)/stack-$(STACK_VER)-x86_64-osx.gz
 STACK_DL=./dist/download/stack-$(STACK_VER).gz
 STACK_BIN=./dist/unpack/stack-$(STACK_VER)
@@ -20,4 +20,7 @@ $(STACK_BIN):
 	chmod +x $(STACK_BIN).tmp
 	mv $(STACK_BIN).tmp $(STACK_BIN)
 
-.PHONY: all ghc GHC.app
+clean:
+	rm -rf dist GHC/build
+
+.PHONY: all clean ghc GHC.app
