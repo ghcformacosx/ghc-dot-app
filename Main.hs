@@ -125,10 +125,10 @@ defRule = Rule
 
 latestGhc :: Release
 latestGhc = Release
-  { releaseVersion = "7.10.2"
-  , releaseUrl     = "http://downloads.haskell.org/~ghc/7.10.2/ghc-7.10.2-x86_64-apple-darwin.tar.xz"
-  , releaseSha1    = "57cf049a5ff5f587a23e567628d50319e74b8dc3"
-  , releaseSize    = 86840016
+  { releaseVersion = "7.10.3"
+  , releaseUrl     = "http://downloads.haskell.org/~ghc/7.10.3/ghc-7.10.3-x86_64-apple-darwin.tar.xz"
+  , releaseSha1    = "fe0d26e6c65e911fbc2897700c35f561d3b56710"
+  , releaseSize    = 88133560
   }
 
 latestCabal :: Release
@@ -141,10 +141,10 @@ latestCabal = Release
 
 latestStack :: Release
 latestStack = Release
-  { releaseVersion = "0.1.2.0"
-  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-x86_64-osx.gz"
-  , releaseSha1    = "cc326959e54c824793973ff5cea4f5c1781e90a1"
-  , releaseSize    = 7181915
+  { releaseVersion = "0.1.10.0"
+  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v0.1.10.0/stack-0.1.10.0-osx-x86_64.tar.gz"
+  , releaseSha1    = "14336e401a08c4995ed4c4ee9f06da13f71a77c3"
+  , releaseSize    = 8547551
   }
 
 latestReleases :: Releases

@@ -1,5 +1,5 @@
-STACK_VER=0.1.2.0
-STACK_URL=https://github.com/commercialhaskell/stack/releases/download/v$(STACK_VER)/stack-$(STACK_VER)-x86_64-osx.gz
+STACK_VER=0.1.10.0
+STACK_URL=https://github.com/commercialhaskell/stack/releases/download/v$(STACK_VER)/stack-$(STACK_VER)-osx-x86_64.tar.gz
 STACK_DL=./dist/download/stack-$(STACK_VER).gz
 STACK_BIN=./dist/unpack/stack-$(STACK_VER)
 STACK=$(shell which stack || echo $(STACK_BIN))
