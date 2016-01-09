@@ -286,24 +286,6 @@ downloadRelease getRel bs@(BuildState { buildDownloadDir }) = defRule
       , (releaseSha1 rel ==) <$> sha1 tarFileName
       ]
 
-gunzipRelease :: (BuildState -> Release)
-              -> FilePath
-              -> BuildState -> Rule
-gunzipRelease getRel unpackDest bs@(BuildState
-    { buildUnpackDir, buildDownloadDir }) = defRule
-  { ruleName         = "unzip " ++ releaseFileName rel
-  , ruleCheck        = doesDirectoryExist unpackDest
-  , ruleDependencies = [ downloadRelease getRel bs
-                       , ensureDir buildUnpackDir ]
-  , ruleRun          = withDir buildUnpackDir $ do
-      callProcess "gzip" [ "-d", "-k", gzipFileName ]
-      callProcess "mv" [ dropExtension gzipFileName, "stack" ]
-      callProcess "chmod" [ "+x", "stack" ]
-  }
-  where
-    rel = getRel bs
-    gzipFileName = buildDownloadDir </> releaseFileName rel
-
 unpackRelease :: (BuildState -> Release)
               -> FilePath
               -> BuildState -> Rule
@@ -352,11 +334,11 @@ installStack :: BuildState -> Rule
 installStack bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
   { ruleName         = "install stack " ++ releaseVersion (buildStackRel bs)
   , ruleCheck        = doesFileExist stackDest
-  , ruleDependencies = [ gunzipRelease buildStackRel stackSrc bs ]
+  , ruleDependencies = [ unpackRelease buildStackRel stackSrc bs ]
   , ruleRun          = copyFile stackSrc stackDest
   }
   where
-    stackSrc  = buildUnpackDir </> "stack"
+    stackSrc  = buildUnpackDir </> "stack-" ++ releaseVersion (buildStackRel bs) ++ "-osx-x86_64" </> "stack"
     stackDest = buildBinDir </> "stack"
 
 buildApp :: BuildState -> Rule
