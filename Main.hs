@@ -1,5 +1,6 @@
 -- #!/usr/bin/env runhaskell
-{-# LANGUAGE OverloadedStrings, NamedFieldPuns #-}
+{-# LANGUAGE NamedFieldPuns    #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 {-
 
@@ -13,33 +14,29 @@ TODO:
 -}
 module Main (main) where
 
-import Data.Char (toUpper)
-import Control.Applicative ((<$>))
-import System.Environment (getArgs, unsetEnv)
-import System.Directory
-  ( getCurrentDirectory, getDirectoryContents, doesDirectoryExist
-  , setCurrentDirectory, createDirectoryIfMissing, doesFileExist
-  , copyFile
-  )
-import System.FilePath ((</>), dropExtension, takeExtension, takeFileName)
-import System.Process (callProcess, readProcess)
-import Control.Monad (when, filterM, foldM)
-import System.Posix.Files
-  ( getSymbolicLinkStatus, getFileStatus, isSymbolicLink, fileSize )
-import System.IO (stderr, hPutStrLn)
-import System.Exit (exitFailure)
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import qualified Data.Text.Encoding as T
-import qualified Data.ByteString as B
-import qualified Control.Exception as C
-import System.Console.GetOpt
-  ( ArgOrder(..)
-  , OptDescr(..)
-  , ArgDescr(..)
-  , usageInfo
-  , getOpt
-  )
+import           Control.Applicative   ((<$>))
+import qualified Control.Exception     as C
+import           Control.Monad         (filterM, foldM, when)
+import qualified Data.ByteString       as B
+import           Data.Char             (toUpper)
+import qualified Data.Text             as T
+import qualified Data.Text.Encoding    as T
+import qualified Data.Text.IO          as T
+import           System.Console.GetOpt (ArgDescr (..), ArgOrder (..),
+                                        OptDescr (..), getOpt, usageInfo)
+import           System.Directory      (copyFile, createDirectoryIfMissing,
+                                        doesDirectoryExist, doesFileExist,
+                                        getCurrentDirectory,
+                                        getDirectoryContents,
+                                        setCurrentDirectory)
+import           System.Environment    (getArgs, unsetEnv)
+import           System.Exit           (exitFailure)
+import           System.FilePath       (dropExtension, takeExtension,
+                                        takeFileName, (</>))
+import           System.IO             (hPutStrLn, stderr)
+import           System.Posix.Files    (fileSize, getFileStatus,
+                                        getSymbolicLinkStatus, isSymbolicLink)
+import           System.Process        (callProcess, readProcess)
 
 -- Layout:
 --
@@ -49,26 +46,24 @@ import System.Console.GetOpt
 --
 
 data BuildState = BuildState
-  { buildRel             :: Release
-  , buildCabalRel        :: Release
-  , buildStackRel        :: Release
-  , buildDistDir         :: String
-  , buildDownloadDir     :: String
-  , buildUnpackDir       :: String
-  , buildUnpackDest      :: String
-  , buildBuildDir        :: String
-  , buildAppDir          :: String
-  , buildPrefixDir       :: String
-  , buildPkgRoot         :: String
-  , buildGhcName         :: String
-  , buildBinDir          :: String
-  , buildConfDir         :: String
-  , buildShareDir        :: String
+  { buildRel         :: Release
+  , buildStackRel    :: Release
+  , buildDistDir     :: String
+  , buildDownloadDir :: String
+  , buildUnpackDir   :: String
+  , buildUnpackDest  :: String
+  , buildBuildDir    :: String
+  , buildAppDir      :: String
+  , buildPrefixDir   :: String
+  , buildPkgRoot     :: String
+  , buildGhcName     :: String
+  , buildBinDir      :: String
+  , buildConfDir     :: String
+  , buildShareDir    :: String
   } deriving (Show, Eq)
 
 data Releases = Releases
-  { releasesCabal :: Release
-  , releasesStack :: Release
+  { releasesStack :: Release
   , releasesGhc   :: Release
   }
 
@@ -93,13 +88,11 @@ buildState :: Releases -> FilePath -> BuildState
 buildState releases here = b
   where
     rel = releasesGhc releases
-    cabalRel = releasesCabal releases
     stackRel = releasesStack releases
     distDir = here </> "dist"
     n = buildGhcName b
     b = BuildState
       { buildRel             = rel
-      , buildCabalRel        = cabalRel
       , buildStackRel        = stackRel
       , buildDistDir         = distDir
       , buildDownloadDir     = distDir </> "download"
@@ -131,26 +124,17 @@ latestGhc = Release
   , releaseSize    = 86840016
   }
 
-latestCabal :: Release
-latestCabal = Release
-  { releaseVersion = "1.22.6.0"
-  , releaseUrl     = "https://s3.halcyon.sh/osx-10.9-x86_64/halcyon-cabal-1.22.6.0.tar.gz"
-  , releaseSha1    = "e941f12d5fde8820eb8374637712add1e168be14"
-  , releaseSize    = 4583511
-  }
-
 latestStack :: Release
 latestStack = Release
-  { releaseVersion = "0.1.2.0"
-  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-x86_64-osx.gz"
-  , releaseSha1    = "cc326959e54c824793973ff5cea4f5c1781e90a1"
-  , releaseSize    = 7181915
+  { releaseVersion = "1.0.2"
+  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v1.0.2/stack-1.0.2-osx-x86_64.tar.gz"
+  , releaseSha1    = "db04ac1ed5abc8962ad065542b9122cc0526edf5"
+  , releaseSize    = 9473007
   }
 
 latestReleases :: Releases
 latestReleases = Releases
-  { releasesCabal = latestCabal
-  , releasesStack = latestStack
+  { releasesStack = latestStack
   , releasesGhc   = latestGhc
   }
 
@@ -286,23 +270,23 @@ downloadRelease getRel bs@(BuildState { buildDownloadDir }) = defRule
       , (releaseSha1 rel ==) <$> sha1 tarFileName
       ]
 
-gunzipRelease :: (BuildState -> Release)
+unpackStackRelease :: (BuildState -> Release)
               -> FilePath
               -> BuildState -> Rule
-gunzipRelease getRel unpackDest bs@(BuildState
+unpackStackRelease getRel unpackDest bs@(BuildState
     { buildUnpackDir, buildDownloadDir }) = defRule
-  { ruleName         = "unzip " ++ releaseFileName rel
+  { ruleName         = "unpack " ++ releaseFileName rel
   , ruleCheck        = doesDirectoryExist unpackDest
   , ruleDependencies = [ downloadRelease getRel bs
                        , ensureDir buildUnpackDir ]
   , ruleRun          = withDir buildUnpackDir $ do
-      callProcess "gzip" [ "-d", "-k", gzipFileName ]
-      callProcess "mv" [ dropExtension gzipFileName, "stack" ]
+      callProcess "tar" [ "-xzf", targzFileName ]
+      callProcess "mv" [ buildUnpackDir </> dropExtension (dropExtension (releaseFileName rel)) </> "stack", "stack" ]
       callProcess "chmod" [ "+x", "stack" ]
   }
   where
     rel = getRel bs
-    gzipFileName = buildDownloadDir </> releaseFileName rel
+    targzFileName = buildDownloadDir </> releaseFileName rel
 
 unpackRelease :: (BuildState -> Release)
               -> FilePath
@@ -339,20 +323,19 @@ buildRelease bs@(BuildState
 
 installCabal :: BuildState -> Rule
 installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
-  { ruleName         = "install cabal " ++ releaseVersion (buildCabalRel bs)
+  { ruleName         = "install cabal"
   , ruleCheck        = doesFileExist cabalDest
-  , ruleDependencies = [ unpackRelease buildCabalRel cabalSrc bs ]
-  , ruleRun          = copyFile cabalSrc cabalDest
+  , ruleDependencies = [ installStack bs ]
+  , ruleRun          = callProcess (buildBinDir </> "stack") ["--local-bin-path", buildBinDir, "install", "cabal-install"]
   }
   where
-    cabalSrc  = buildUnpackDir </> "bin" </> "cabal"
     cabalDest = buildBinDir </> "cabal"
 
 installStack :: BuildState -> Rule
 installStack bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
   { ruleName         = "install stack " ++ releaseVersion (buildStackRel bs)
   , ruleCheck        = doesFileExist stackDest
-  , ruleDependencies = [ gunzipRelease buildStackRel stackSrc bs ]
+  , ruleDependencies = [ unpackStackRelease buildStackRel stackSrc bs ]
   , ruleRun          = copyFile stackSrc stackDest
   }
   where
@@ -363,8 +346,8 @@ buildApp :: BuildState -> Rule
 buildApp bs = defRule
   { ruleName         = "building " ++ buildAppDir bs
   , ruleDependencies = map ($ bs) [ buildRelease
-                                  , installCabal
                                   , installStack
+                                  , installCabal
                                   , sanityCheck ]
   }
 
@@ -387,9 +370,6 @@ options = do
     [ ("ghc", \f x -> do
         release <- f (releasesGhc x)
         return x { releasesGhc = release })
-    , ("cabal", \f x -> do
-        release <- f (releasesCabal x)
-        return x { releasesCabal = release })
     , ("stack", \f x -> do
         release <- f (releasesStack x)
         return x { releasesStack = release })
