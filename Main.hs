@@ -1,6 +1,5 @@
 -- #!/usr/bin/env runhaskell
-{-# LANGUAGE NamedFieldPuns    #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, NamedFieldPuns #-}
 
 {-
 
@@ -14,29 +13,33 @@ TODO:
 -}
 module Main (main) where
 
-import           Control.Applicative   ((<$>))
-import qualified Control.Exception     as C
-import           Control.Monad         (filterM, foldM, when)
-import qualified Data.ByteString       as B
-import           Data.Char             (toUpper)
-import qualified Data.Text             as T
-import qualified Data.Text.Encoding    as T
-import qualified Data.Text.IO          as T
-import           System.Console.GetOpt (ArgDescr (..), ArgOrder (..),
-                                        OptDescr (..), getOpt, usageInfo)
-import           System.Directory      (copyFile, createDirectoryIfMissing,
-                                        doesDirectoryExist, doesFileExist,
-                                        getCurrentDirectory,
-                                        getDirectoryContents,
-                                        setCurrentDirectory)
-import           System.Environment    (getArgs, unsetEnv)
-import           System.Exit           (exitFailure)
-import           System.FilePath       (dropExtension, takeExtension,
-                                        takeFileName, (</>))
-import           System.IO             (hPutStrLn, stderr)
-import           System.Posix.Files    (fileSize, getFileStatus,
-                                        getSymbolicLinkStatus, isSymbolicLink)
-import           System.Process        (callProcess, readProcess)
+import Data.Char (toUpper)
+import Control.Applicative ((<$>))
+import System.Environment (getArgs, unsetEnv)
+import System.Directory
+  ( getCurrentDirectory, getDirectoryContents, doesDirectoryExist
+  , setCurrentDirectory, createDirectoryIfMissing, doesFileExist
+  , copyFile
+  )
+import System.FilePath ((</>), dropExtension, takeExtension, takeFileName)
+import System.Process (callProcess, readProcess)
+import Control.Monad (when, filterM, foldM)
+import System.Posix.Files
+  ( getSymbolicLinkStatus, getFileStatus, isSymbolicLink, fileSize )
+import System.IO (stderr, hPutStrLn)
+import System.Exit (exitFailure)
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
+import qualified Data.Text.Encoding as T
+import qualified Data.ByteString as B
+import qualified Control.Exception as C
+import System.Console.GetOpt
+  ( ArgOrder(..)
+  , OptDescr(..)
+  , ArgDescr(..)
+  , usageInfo
+  , getOpt
+  )
 
 -- Layout:
 --
@@ -46,20 +49,20 @@ import           System.Process        (callProcess, readProcess)
 --
 
 data BuildState = BuildState
-  { buildRel         :: Release
-  , buildStackRel    :: Release
-  , buildDistDir     :: String
-  , buildDownloadDir :: String
-  , buildUnpackDir   :: String
-  , buildUnpackDest  :: String
-  , buildBuildDir    :: String
-  , buildAppDir      :: String
-  , buildPrefixDir   :: String
-  , buildPkgRoot     :: String
-  , buildGhcName     :: String
-  , buildBinDir      :: String
-  , buildConfDir     :: String
-  , buildShareDir    :: String
+  { buildRel             :: Release
+  , buildStackRel        :: Release
+  , buildDistDir         :: String
+  , buildDownloadDir     :: String
+  , buildUnpackDir       :: String
+  , buildUnpackDest      :: String
+  , buildBuildDir        :: String
+  , buildAppDir          :: String
+  , buildPrefixDir       :: String
+  , buildPkgRoot         :: String
+  , buildGhcName         :: String
+  , buildBinDir          :: String
+  , buildConfDir         :: String
+  , buildShareDir        :: String
   } deriving (Show, Eq)
 
 data Releases = Releases
