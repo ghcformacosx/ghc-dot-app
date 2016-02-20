@@ -141,10 +141,10 @@ latestCabal = Release
 
 latestStack :: Release
 latestStack = Release
-  { releaseVersion = "0.1.10.0"
-  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v0.1.10.0/stack-0.1.10.0-osx-x86_64.tar.gz"
-  , releaseSha1    = "14336e401a08c4995ed4c4ee9f06da13f71a77c3"
-  , releaseSize    = 8547551
+  { releaseVersion = "1.0.4"
+  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v1.0.4/stack-1.0.4-osx-x86_64.tar.gz"
+  , releaseSha1    = "bc1f7a946b0664d29b3b7401f738b1ab6a907345"
+  , releaseSize    = 9737246
   }
 
 latestReleases :: Releases

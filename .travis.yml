@@ -1,0 +1,12 @@
+language: objective-c
+cache:
+  directories:
+  - "$HOME/.stack"
+matrix:
+  include:
+  - os: osx
+    language: objective-c
+install:
+- "make stack-setup"
+script:
+- "make travis"
