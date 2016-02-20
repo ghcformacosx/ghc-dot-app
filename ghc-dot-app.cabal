@@ -1,5 +1,5 @@
 name:                ghc-dot-app
-version:             7.10.1-r1
+version:             7.10.3-r0
 synopsis:            Mac OS X wrapper for GHC installation
 description:         Please see README.md
 homepage:            https://github.com/ghcformacosx/ghc-dot-app

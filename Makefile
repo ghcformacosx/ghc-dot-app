@@ -1,7 +1,7 @@
-STACK_VER=0.1.2.0
-STACK_URL=https://github.com/commercialhaskell/stack/releases/download/v$(STACK_VER)/stack-$(STACK_VER)-x86_64-osx.gz
-STACK_DL=./dist/download/stack-$(STACK_VER).gz
-STACK_BIN=./dist/unpack/stack-$(STACK_VER)
+STACK_VER=0.1.10.0
+STACK_URL=https://github.com/commercialhaskell/stack/releases/download/v$(STACK_VER)/stack-$(STACK_VER)-osx-x86_64.tar.gz
+STACK_DL=./dist/download/stack-$(STACK_VER).tar.gz
+STACK_BIN=./dist/unpack/stack-$(STACK_VER)-osx-x86_64/stack
 STACK=$(shell which stack || echo $(STACK_BIN))
 
 all: ghc
@@ -16,9 +16,7 @@ ghc: $(STACK)
 $(STACK_BIN):
 	mkdir -p ./dist/download ./dist/unpack
 	curl -s -L -o $(STACK_DL) $(STACK_URL)
-	gzcat $(STACK_DL) > $(STACK_BIN).tmp
-	chmod +x $(STACK_BIN).tmp
-	mv $(STACK_BIN).tmp $(STACK_BIN)
+	tar -xf $(STACK_DL) -C ./dist/unpack
 
 clean:
 	rm -rf dist GHC/build

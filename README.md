@@ -3,13 +3,13 @@
 Want to try Haskell on your Mac without having to use homebrew or
 even install anything globally? Download a self-contained GHC release here!
 
-* [ghc-7.10.2-r0.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.10.2-r0/ghc-7.10.2-r0.zip)
+* [ghc-7.10.3-r0.zip](https://github.com/etrepum/ghc-dot-app/releases/download/v7.10.3-r0/ghc-7.10.3-r0.zip)
 
 # What it includes
 
-* GHC 7.10.2
+* GHC 7.10.3
 * cabal-install 1.22.6.0 (just the binary)
-* stack 0.1.2.0 (just the binary)
+* stack 0.1.10.0 (just the binary)
 * HTML documentation
 * man pages
 
@@ -23,7 +23,7 @@ need except for Xcode. It leverages `stack` to do everything.
 
 ## Minimal (no GUI helper)
 
-This will build a relocatable ghc-7.10.2.app in ./dist/build using
+This will build a relocatable ghc-7.10.3.app in ./dist/build using
 the binaries of GHC and cabal-install from haskell.org and stack from
 GitHub. This does not include the GUI helper.
 
@@ -42,7 +42,7 @@ $ rm -rf ./dist/
 Add this GHC to your PATH (assuming it has moved to /Applications):
 
 ```bash
-export PATH=$HOME/.local/bin:$HOME/.cabal/bin:/Applications/ghc-7.10.2.app/Contents/bin:$PATH
+export PATH=$HOME/.local/bin:$HOME/.cabal/bin:/Applications/ghc-7.10.3.app/Contents/bin:$PATH
 ```
 
 # Full (GUI helper with code signing)
