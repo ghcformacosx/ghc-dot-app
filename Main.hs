@@ -4,7 +4,8 @@
 {-
 
 This builds a relocatable ghc-$version.app in dist/build,
-including cabal-install 1.22.0.0
+downloads stack from GitHub,
+and builds cabal-install using stack.
 
 TODO:
 
