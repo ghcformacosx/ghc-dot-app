@@ -50,7 +50,6 @@ import System.Console.GetOpt
 
 data BuildState = BuildState
   { buildRel             :: Release
-  , buildCabalRel        :: Release
   , buildStackRel        :: Release
   , buildDistDir         :: String
   , buildDownloadDir     :: String
@@ -67,8 +66,7 @@ data BuildState = BuildState
   } deriving (Show, Eq)
 
 data Releases = Releases
-  { releasesCabal :: Release
-  , releasesStack :: Release
+  { releasesStack :: Release
   , releasesGhc   :: Release
   }
 
@@ -93,13 +91,11 @@ buildState :: Releases -> FilePath -> BuildState
 buildState releases here = b
   where
     rel = releasesGhc releases
-    cabalRel = releasesCabal releases
     stackRel = releasesStack releases
     distDir = here </> "dist"
     n = buildGhcName b
     b = BuildState
       { buildRel             = rel
-      , buildCabalRel        = cabalRel
       , buildStackRel        = stackRel
       , buildDistDir         = distDir
       , buildDownloadDir     = distDir </> "download"
@@ -131,14 +127,6 @@ latestGhc = Release
   , releaseSize    = 88133560
   }
 
-latestCabal :: Release
-latestCabal = Release
-  { releaseVersion = "1.22.6.0"
-  , releaseUrl     = "https://s3.halcyon.sh/osx-10.9-x86_64/halcyon-cabal-1.22.6.0.tar.gz"
-  , releaseSha1    = "e941f12d5fde8820eb8374637712add1e168be14"
-  , releaseSize    = 4583511
-  }
-
 latestStack :: Release
 latestStack = Release
   { releaseVersion = "1.0.4"
@@ -149,8 +137,7 @@ latestStack = Release
 
 latestReleases :: Releases
 latestReleases = Releases
-  { releasesCabal = latestCabal
-  , releasesStack = latestStack
+  { releasesStack = latestStack
   , releasesGhc   = latestGhc
   }
 
@@ -321,13 +308,12 @@ buildRelease bs@(BuildState
 
 installCabal :: BuildState -> Rule
 installCabal bs@(BuildState { buildUnpackDir, buildBinDir }) = defRule
-  { ruleName         = "install cabal " ++ releaseVersion (buildCabalRel bs)
+  { ruleName         = "install cabal"
   , ruleCheck        = doesFileExist cabalDest
-  , ruleDependencies = [ unpackRelease buildCabalRel cabalSrc bs ]
-  , ruleRun          = copyFile cabalSrc cabalDest
+  , ruleDependencies = [ installStack bs ]
+  , ruleRun          = callProcess (buildBinDir </> "stack") ["--local-bin-path", buildBinDir, "install", "cabal-install"]
   }
   where
-    cabalSrc  = buildUnpackDir </> "bin" </> "cabal"
     cabalDest = buildBinDir </> "cabal"
 
 installStack :: BuildState -> Rule
@@ -345,8 +331,8 @@ buildApp :: BuildState -> Rule
 buildApp bs = defRule
   { ruleName         = "building " ++ buildAppDir bs
   , ruleDependencies = map ($ bs) [ buildRelease
-                                  , installCabal
                                   , installStack
+                                  , installCabal
                                   , sanityCheck ]
   }
 
@@ -369,9 +355,6 @@ options = do
     [ ("ghc", \f x -> do
         release <- f (releasesGhc x)
         return x { releasesGhc = release })
-    , ("cabal", \f x -> do
-        release <- f (releasesCabal x)
-        return x { releasesCabal = release })
     , ("stack", \f x -> do
         release <- f (releasesStack x)
         return x { releasesStack = release })
