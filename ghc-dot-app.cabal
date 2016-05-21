@@ -1,5 +1,5 @@
 name:                ghc-dot-app
-version:             7.10.3-r1
+version:             8.0.1-r0
 synopsis:            Mac OS X wrapper for GHC installation
 description:         Please see README.md
 homepage:            https://github.com/ghcformacosx/ghc-dot-app
@@ -9,7 +9,7 @@ author:              Bob Ippolito
 maintainer:          bob@redivi.com
 category:            Development
 build-type:          Simple
-cabal-version:       >=1.10
+cabal-version:       >=1.24
 
 executable main
   hs-source-dirs:      .

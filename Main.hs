@@ -122,18 +122,18 @@ defRule = Rule
 
 latestGhc :: Release
 latestGhc = Release
-  { releaseVersion = "7.10.3"
-  , releaseUrl     = "http://downloads.haskell.org/~ghc/7.10.3/ghc-7.10.3-x86_64-apple-darwin.tar.xz"
-  , releaseSha1    = "fe0d26e6c65e911fbc2897700c35f561d3b56710"
-  , releaseSize    = 88133560
+  { releaseVersion = "8.0.1"
+  , releaseUrl     = "http://downloads.haskell.org/~ghc/8.0.1/ghc-8.0.1-x86_64-apple-darwin.tar.xz"
+  , releaseSha1    = "e7a1c558a095afbc4fb514256be940ddb0f23a29"
+  , releaseSize    = 118496652
   }
 
 latestStack :: Release
 latestStack = Release
-  { releaseVersion = "1.0.4"
-  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v1.0.4/stack-1.0.4-osx-x86_64.tar.gz"
-  , releaseSha1    = "bc1f7a946b0664d29b3b7401f738b1ab6a907345"
-  , releaseSize    = 9737246
+  { releaseVersion = "1.1.2"
+  , releaseUrl     = "https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-osx-x86_64.tar.gz"
+  , releaseSha1    = "6da85ae178445c85c18458ea1533d23ee653cac6"
+  , releaseSize    = 10737829
   }
 
 latestReleases :: Releases
